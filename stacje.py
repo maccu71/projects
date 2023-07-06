@@ -9,7 +9,11 @@ def download():
     print('We need to download data from the web...one moment')
     URL = "http://91.132.145.114/json/stations"
     response = requests.get(URL)
-    open("stations", "wb").write(response.content)
+    if response.status_code == '200':
+        open("stations", "wb").write(response.content)
+    else:
+        print('strona z bazą stacji radiowych jest nieaktywna..')
+        exit
 
 # check if the file exists and is not too old, alternatively download
 filename = 'stations'
@@ -66,7 +70,6 @@ def getData(url):
     Media.get_mrl()
     player.set_media(Media)
     player.play()
-    #Instance.log_unset()
     prev = ""
     while True:
         time.sleep(1)
