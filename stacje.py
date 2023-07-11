@@ -17,7 +17,7 @@ def download():
 
 # check if the file exists and is not too old, alternatively download
 filename = 'stations'
-days = 5
+days = 30
 
 if os.path.exists(filename):
     file_time = os.path.getmtime(filename)
