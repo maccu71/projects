@@ -48,7 +48,7 @@ print('\nnr   vote      bitrate      name')
 for i, y in enumerate(po_wyb):
     print(str(i+1).ljust(5, ' ') + (str(y[2]).ljust(10, ' ') + str(y[3]).ljust(13, ' ') + str(y[0])))
 
-ktora = int(input('\nWhich one you want?: '))
+ktora = int(input('\nWhich one you want? (enter the nr): '))
 urls = po_wyb[ktora-1][1]
 
 print(f'stacja: {urls}\n')

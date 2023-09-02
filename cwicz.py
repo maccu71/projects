@@ -42,7 +42,7 @@ for i in druga:
     data.update({i:x})
 data.update({Days:Wynik})  # add last result
 
-odp = input("save to seconds db? y/n ")
+odp = input("save the output? y/n ")
 print()
 if odp.lower() == "y":
     druga[str(Days)] = czas
@@ -50,26 +50,18 @@ if odp.lower() == "y":
         json.dump(druga, file)
 
 # show results in a list form
-print(f'list that shows days/seconds: {druga}')
-print(f'list that shows days/percents: {data}')
+print(f'days/seconds: {druga}')
+print(f'days/percents: {data}')
 
 # plotting results
 x = list(data.keys())
 y = list(data.values())
 
-# plotting the points 
-
-#default_x_ticks = range(len(x))
-
 plt.plot(x, y, color='green', linewidth=2, marker='o',
     markerfacecolor='red', markersize=4)
-######
 
-
-
-
-# plt.ylim([-10, 110])
 plt.xlabel('days from the first one')   # naming the x axis
 plt.ylabel('progress in %')         # naming the y axis
+
 plt.title('progress in exercising')  # giving a title to my graph
 plt.show()                          # function to show the plot
