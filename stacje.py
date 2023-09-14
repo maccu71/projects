@@ -9,7 +9,7 @@ def download():
     print('We need to download data from the web...one moment')
     URL = "http://91.132.145.114/json/stations"
     response = requests.get(URL)
-    if response.status_code == '200':
+    if response.status_code == 200:
         open("stations", "wb").write(response.content)
     else:
         print('strona z bazą stacji radiowych jest nieaktywna..')
