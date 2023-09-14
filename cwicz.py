@@ -34,6 +34,22 @@ Wynik = round(wspolczynnik * (lista_max - czas))
 
 print(f'Your result: {Wynik:.1f} % \n')
 
+
+better, worst = 0, 0
+for i in druga.values():
+    if czas < i:
+        worst += 1
+    if czas > i:
+        better += 1
+if better == 0:
+    print('YOUR BEST RUN!!')
+else:
+    print(f'Number of better runs:({better}) ',end='')
+    print('\u25A0'*better)
+    print(f'Number of worst  runs:({worst}) ',end='')
+    print('\u25A0'*worst)
+
+
 data = {}  # dict with % results (as comparison to max)
 
 for i in druga:
