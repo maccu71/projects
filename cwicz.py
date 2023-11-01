@@ -1,6 +1,5 @@
 '''
 This is an app to visualize my running results as well as store them.
-print(f'\033[91m hallo \x1b[0m')  - colored console - not applied here $$
 '''
 
 from datetime import date
