@@ -1,0 +1,8 @@
+---
+- name: 'ping servers 33 and 110'
+  become: yes
+  gather_facts: no
+  hosts: all
+  tasks:
+     - name: ping servers
+       ping: 
