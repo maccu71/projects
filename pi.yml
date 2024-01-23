@@ -1,7 +1,0 @@
----
-- name: 'ping servers 33 and 110'
-  gather_facts: yes
-  hosts: all
-  tasks:
-     - name: ping servers
-       ping: 
