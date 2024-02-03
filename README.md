@@ -6,3 +6,5 @@ Here you will find 4 small programs designed/aimed at confirming the ability to 
 4) int2roman, a very simple program that converts integers into Roman numerals using a recursive function.
 5) init-containers-usage - a compressed helm package that illustrates how to use init-containers in Kubernetes cluster. 
 ![plot](/home/maco/init.png)
+![obraz](https://github.com/maccu71/projects/assets/51779238/d982af6a-e8ef-4a85-b30a-4619db6070a1)
+
