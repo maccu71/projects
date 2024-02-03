@@ -10,15 +10,8 @@ Here you will find 4 small programs designed/aimed at confirming the ability to 
 
 To install deployment with service you need to:
 1) have working Kubernetes cluster eg. Minikube
-<<<<<<< HEAD
 2) helm install release-name https://raw.githubusercontent.com/maccu71/projects/master/init-containers-usage-1.0.0.tgz
 3) helm install my-release init-containers-usage-1.0.0.tgz
 4) see the picture on localhost port:  kubectl get service my-release -o jsonpath='{.spec.ports[*].nodePort}'|jq  
 OR use: minikube service my-release
-=======
-2) #helm add repo repo-name https://github.com/maccu71/projects/init-containers-usage-1.0.0.tgz
-4)  git pull https://github.com/maccu71/projects/
-4) #helm repo update 
-5) helm install depoyment-name init-containers-usage-1.0.0.tgz
->>>>>>> 30b620666e6193dc8e6daf136a024c6fd4ac108f
 
