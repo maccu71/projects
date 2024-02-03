@@ -5,4 +5,4 @@ Here you will find 4 small programs designed/aimed at confirming the ability to 
 3) cwicz.py, which was created to track and backup my running results and display them on a nice graph. This application uses the matplotlib, time, and json modules.
 4) int2roman, a very simple program that converts integers into Roman numerals using a recursive function.
 5) init-containers-usage - a compressed helm package that illustrates how to use init-containers in Kubernetes cluster. 
-![Screenshot](https://www.canva.com/design/DAF7w4Fs-Mo/Ah0wlXpA4uegdcEfEkrpEQ/edit?utm_content=DAF7w4Fs-Mo&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+![plot](/home/maco/init.png)
