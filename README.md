@@ -4,6 +4,11 @@ Here you will find 4 small programs designed/aimed at confirming the ability to 
 2) cwicz.py, which was created to track and backup my running results and display them on a nice graph. This application uses the matplotlib, time, and json modules.
 3) init-containers-usage - a compressed helm package that illustrates how to use init-containers in Kubernetes cluster. 
 ![obraz](https://github.com/maccu71/projects/assets/51779238/d982af6a-e8ef-4a85-b30a-4619db6070a1)
+To install deployment with service you need to:
+1) have working Kubernetes cluster eg. Minikube
+2) helm add repo repo-name https://github.com/maccu71/projects/init-containers-usage-1.0.0.tgz
+3) helm repo update 
+4) helm install depoyment-name repo-name
 
 To install deployment with service you need to:
 1) have working Kubernetes cluster eg. Minikube
