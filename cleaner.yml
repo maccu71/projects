@@ -1,0 +1,72 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: service-deleter
+rules:
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get","list","delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: service-deleter-binding
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default
+roleRef:
+  kind: Role
+  name: service-deleter
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cleaner-config
+data:
+  cleaner.sh: |-
+    #!/bin/bash
+    chmod +x /data/cleaner.sh
+    apt-get update
+    apt-get install -y wget
+    wget https://storage.googleapis.com/kubernetes-release/release/$(wget -qO- https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    chmod +x kubectl 
+    mv kubectl /usr/local/bin/
+    # delete all services without kubernetes in a default namespace
+    for i in $(kubectl get services -o jsonpath='{range .items[?(@.metadata.name!="kubernetes")]}{.metadata.name}{"\n"}{end}'); do kubectl delete service $i; done
+    for i in $(kubectl get deployments -o jsonpath='{range .items[?(@.metadata.name!="cleaner")]}{.metadata.name}{"\n"}{end}'); do kubectl delete deployment $i; done
+    echo 'delete itself.. deployment and service..'
+    kubectl delete deployment cleaner 
+    echo "- service cleaning done.."
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cleaner
+spec: 
+  selector:
+    matchLabels:
+      ver: one9      
+  template:
+    metadata:
+      labels:
+        ver: one9
+    spec:
+      containers:
+        - name: kontener
+          image: ubuntu:latest
+          command: ['sh','-c', 'bash /data/cleaner.sh || sleep 900']
+          volumeMounts:
+          - name: config
+            mountPath: "/data/"
+      volumes:
+        - name: config
+          configMap:
+            name: cleaner-config
