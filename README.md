@@ -6,7 +6,7 @@ Here you will find 3 small projects:
 
 To install this deployment with its service you need to:
 1) have working Kubernetes cluster eg. Minikube and Helm package installed
-2) `helm install release-name https://raw.githubusercontent.com/maccu71/projects/master/init-containers-usage-1.0.0.tgz`
+2) `helm install my-release https://raw.githubusercontent.com/maccu71/projects/master/init-containers-usage-1.0.0.tgz`
 3) see the picture on localhost port:  `kubectl get service my-release -o jsonpath='{.spec.ports[*].nodePort}'|jq`  
 OR use: `minikube service my-release`
 
