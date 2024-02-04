@@ -1,10 +1,14 @@
 Here you will find 4 small programs designed/aimed at confirming the ability to freely program small applications and scripts in Python. Here they are:
 
-1) stacje.py - downloads a list of radio stations from the net and allows you to select one from the list, starts it and shows the name of the artist and song. This is a really nice app you can start off just from your linux console
+1) stacje.py - downloads a list of radio stations from the net and allows you to select one from the list, starts it and shows the name of the artist and song. This is a really nice app you can start off just from your linux console.
+
+![obraz](https://github.com/maccu71/projects/assets/51779238/ed8fc9dc-b2ab-41fe-a0d5-b0b1d88a57f6)
+
+
 2) cwicz.py, which was created to track and backup my running results and display them on a nice graph. This application uses the matplotlib, time, and json modules.
 ![obraz](https://github.com/maccu71/projects/assets/51779238/4cd59ca3-d49e-435e-a71b-6646fa46218e)
    
-4) init-containers-usage - a compressed helm package that illustrates how to use init-containers in Kubernetes cluster. 
+3) init-containers-usage - a compressed helm package that illustrates how to use init-containers in Kubernetes cluster. 
 
 ![obraz](https://github.com/maccu71/projects/assets/51779238/d982af6a-e8ef-4a85-b30a-4619db6070a1)
 
