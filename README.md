@@ -1,4 +1,4 @@
-Here you will find 3 small projects:   
+Here you will find 4 small projects:
 
 1) `init-containers-usage` - a helm package that illustrates how to use init-containers in Kubernetes cluster. 
 
@@ -34,5 +34,35 @@ This version clarifies the potential use of a ConfigMap with a Bash script for m
 3) `cwicz.py` - created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.
    
 ![obraz](https://github.com/maccu71/projects/assets/51779238/4cd59ca3-d49e-435e-a71b-6646fa46218e)
-   
+
+
+4) cleaner.yml - kubernetes manifest intended to clean unnecessary resources from kubernetes cluster (use with caution)
+
+The application is designed to manage and clean up resources within a Kubernetes cluster. It runs as a script or containerized process within a Kubernetes pod, providing functionality to delete specified deployments, services, and even trigger the self-deletion. Clean the enviroment without deleting deployments and services individually.
+
+Key Components:
+
+   a) Cleaner Script/Container:
+        Purpose: The core functionality of the Cleaner application resides in a script or containerized process.
+        Tasks:
+            Lists and deletes services not managed by the application within the specified namespace.
+            Lists and deletes deployments not managed by the application within the specified namespace.
+            Checks certain conditions and trigger the self-deletion.
+        Language/Environment: Bash script running within an Ubuntu container.
+
+   b) Kubernetes RBAC Rules:
+        Purpose: Role-Based Access Control (RBAC) rules are applied to grant necessary permissions to the Cleaner application.
+            Permissions for listing and deleting services in the specified namespace.
+            Permissions for listing and deleting deployments in the specified namespace.
+
+Execution Flow:
+
+The Cleaner application starts its execution within the Kubernetes pod.
+It first lists and deletes services not managed by the application.
+It then lists and deletes deployments not managed by the application.
+The application deletes itself (but leaving RBAC rules)
+
+Use Case Scenario:
+
+When periodic resource cleanup is required in the Kubernetes cluster, the Cleaner application is deployed to automate the process. It ensures that only the specified services and deployments are retained, providing a streamlined and controlled environment.
 
