@@ -61,11 +61,7 @@ spec:
       containers:
         - name: kontener
           image: ubuntu:latest
-<<<<<<< HEAD
           command: ['sh', '-c', 'bash /data/cleaner.sh']
-=======
-          command: ['sh','-c', './data/cleaner.sh']
->>>>>>> 64b8823edbdeb9ee5406b5cb0cc08a11a64109d7
           volumeMounts:
           - name: config
             mountPath: "/data/"
