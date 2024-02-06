@@ -32,7 +32,6 @@ metadata:
 data:
   cleaner.sh: |-
     #!/bin/bash
-    chmod +x /data/cleaner.sh
     apt-get update
     apt-get install -y wget
     wget https://storage.googleapis.com/kubernetes-release/release/$(wget -qO- https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
@@ -41,9 +40,9 @@ data:
     # delete all services without kubernetes in a default namespace
     for i in $(kubectl get services -o jsonpath='{range .items[?(@.metadata.name!="kubernetes")]}{.metadata.name}{"\n"}{end}'); do kubectl delete service $i; done
     for i in $(kubectl get deployments -o jsonpath='{range .items[?(@.metadata.name!="cleaner")]}{.metadata.name}{"\n"}{end}'); do kubectl delete deployment $i; done
-    echo 'delete itself.. deployment and service..'
+    echo 'delete itself..'
     kubectl delete deployment cleaner 
-    echo "- service cleaning done.."
+    echo "cleaning done.."
 
 ---
 apiVersion: apps/v1
@@ -62,7 +61,7 @@ spec:
       containers:
         - name: kontener
           image: ubuntu:latest
-          command: ['sh','-c', 'bash /data/cleaner.sh || sleep 900']
+          command: ['sh','-c', './data/cleaner.sh']
           volumeMounts:
           - name: config
             mountPath: "/data/"
