@@ -7,8 +7,8 @@ Here you will find 4 small projects:
 To install this deployment with its service you need to:
 1) have working Kubernetes cluster eg. Minikube and Helm package installed
 2) `helm install my-release https://raw.githubusercontent.com/maccu71/projects/master/init-containers-usage-1.0.0.tgz`
-3) see the picture on localhost port:  `kubectl get service my-release -o jsonpath='{.spec.ports[*].nodePort}'|jq`  
-OR use: `minikube service my-release`
+3) you'll see the picture from NASA server on your browser:   `localhost:$(kubectl get service my-release -o jsonpath='{.spec.ports[*].nodePort}'|jq)`  
+OR if you use Minikube just: `minikube service my-release`
 
 Init containers in Kubernetes are lightweight, transient containers that run and complete before the main application containers start. They are designed to perform initialization tasks, setup, or any necessary preparations before the main application containers in a pod begin running.
 
