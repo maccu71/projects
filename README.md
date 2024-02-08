@@ -1,4 +1,4 @@
-Here you will find 4 small projects:
+Here you will find 5 small projects:
 
 1) `init-containers-usage` - a helm package that illustrates how to use init-containers in Kubernetes cluster. 
 
@@ -54,3 +54,50 @@ When periodic resource cleanup is required in the Kubernetes cluster, the Cleane
 It's important to note that this isn't a production solution that involves a ready-to-go image. Instead, it is intended to showcase the RBAC possibilities.
 To delete leftovers (RBAC rules) you can proceed with a command:
 `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/cleaner.yml`
+
+5) `sonda-readiness-tcp.yml` - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers. 
+
+In this case, the readinessProbe is utilized to validate the availability of my local NFS service before bringing to life the container
+
+A readinessProbe in Kubernetes serves as a mechanism to determine whether a container is ready to handle incoming traffic. It plays a mportant role in scenarios where readiness of a service or resource is crucial before allowing the container to receive requests. In this context, the readinessProbe checks the status of an NFS service, ensuring its activation and functionality before proceeding with the creation of the container. This approach enhances the reliability of the containerized application, preventing potential issues that may arise if the required services are not adequately prepared.
+
+You start this deployment by issuing: `kubectl apply -f https://raw.githubusercontent.com/maccu71/projects/master/sonda-readiness-tcp.yml.yml` but probably you don't have configured NFS on provided address/path..
+
+- Lets assume the situation when our NFS is not ready yet. The readinessProbe will check the TCP-connection on standard NFS port (2049) and doesn't show positive outcome. In that case ReplicaSet will refrain from launching the Pod.
+
+`$ kubectl get po,deploy
+NAME                            READY   STATUS              RESTARTS   AGE
+pod/sonda-tcp-7bfcd95db-hv87v   0/1     ContainerCreating   0          11s
+
+NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/sonda-tcp   0/1     1            0           11s`
+
+`kubectl describe pod $(kubectl get po -o jsonpath='{.items[].metadata.name}')|grep -A5 Conditions`
+`Conditions:
+  Type              Status
+  Initialized       True
+  Ready             False    <===
+  ContainersReady   False    <===
+  PodScheduled      True`
+
+
+- When obstacles are overcome and the readinessProbe gives positive outcome (eg. service nfs-server is restarted and working), the creation of container proceed.
+
+`kubectl describe pod $(kubectl get po -o jsonpath='{.items[].metadata.name}')|grep -A5 Conditions`
+`Conditions:
+  Type              Status
+  Initialized       True
+  Ready             True    <===
+  ContainersReady   True    <===
+  PodScheduled      True`
+
+`kubectl get deploy,po`
+`NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/sonda-tcp   1/1     1            1           9m35s
+
+NAME                            READY   STATUS    RESTARTS   AGE
+pod/sonda-tcp-7bfcd95db-hv87v   1/1     Running   0          9m35s`
+
+Rediness Probes is seen in Minikube as well. 
+
+
