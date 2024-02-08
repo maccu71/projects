@@ -52,3 +52,5 @@ Use Case Scenario:
 When periodic resource cleanup is required in the Kubernetes cluster, the Cleaner application is deployed to automate the process. It ensures that only the specified services and deployments are retained, providing a streamlined and controlled environment.
 
 It's important to note that this isn't a production solution that involves a ready-to-go image. Instead, it is intended to showcase the RBAC possibilities.
+To delete leftovers (RBAC rules) you can proceed with a command:
+`kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/cleaner.yml`

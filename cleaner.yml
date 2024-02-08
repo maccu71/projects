@@ -40,9 +40,8 @@ data:
     # delete all services without kubernetes in a default namespace
     for i in $(kubectl get services -o jsonpath='{range .items[?(@.metadata.name!="kubernetes")]}{.metadata.name}{"\n"}{end}'); do kubectl delete service $i; done
     for i in $(kubectl get deployments -o jsonpath='{range .items[?(@.metadata.name!="cleaner")]}{.metadata.name}{"\n"}{end}'); do kubectl delete deployment $i; done
-    echo 'delete itself..'
-    kubectl delete deployment cleaner 
-    echo "cleaning done.."
+    echo 'removing itself..'
+    kubectl delete deployment cleaner
 
 ---
 apiVersion: apps/v1
@@ -61,7 +60,7 @@ spec:
       containers:
         - name: kontener
           image: ubuntu:latest
-          command: ['sh', '-c', 'bash /data/cleaner.sh']
+          command: ['sh', '-c', '/data/cleaner.sh']
           volumeMounts:
           - name: config
             mountPath: "/data/"
@@ -69,3 +68,4 @@ spec:
         - name: config
           configMap:
             name: cleaner-config
+            defaultMode: 0777
