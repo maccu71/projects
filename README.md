@@ -1,5 +1,7 @@
 Here you will find 5 small projects:
 
+<br/><br/> 
+
 1) `init-containers-usage` - a helm package that illustrates how to use init-containers in Kubernetes cluster. 
 
 ![obraz](https://github.com/maccu71/projects/assets/51779238/d982af6a-e8ef-4a85-b30a-4619db6070a1)
@@ -26,15 +28,19 @@ In this example, we could use a ConfigMap with a Bash script (what would be the 
 
 This version clarifies the potential use of a ConfigMap with a Bash script for more complex scenarios while emphasizing the primary purpose of the example, which is to showcase the behavior of sequential init containers
 
+<br/><br/> 
+
 2) `stacje.py` - an application that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song. This is a really nice app that you can launch directly from your Linux console.
 
 ![obraz](https://github.com/maccu71/projects/assets/51779238/ed8fc9dc-b2ab-41fe-a0d5-b0b1d88a57f6)
 
+<br/><br/> 
 
 3) `cwicz.py` - created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.
    
 ![obraz](https://github.com/maccu71/projects/assets/51779238/4cd59ca3-d49e-435e-a71b-6646fa46218e)
 
+<br/><br/> 
 
 4) `cleaner.yml` - kubernetes manifest intended to clean unnecessary resources from kubernetes cluster (use with caution)
 
@@ -55,6 +61,9 @@ It's important to note that this isn't a production solution that involves a rea
 To delete leftovers (RBAC rules) you can proceed with a command:
 `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/cleaner.yml`
 
+
+<br/><br/> 
+
 5) `sonda-readiness-tcp.yml` - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers. 
 
 In this case, the readinessProbe is utilized to validate the availability of my local NFS service before bringing to life the container
@@ -64,40 +73,44 @@ A readinessProbe in Kubernetes serves as a mechanism to determine whether a cont
 You start this deployment by issuing: `kubectl apply -f https://raw.githubusercontent.com/maccu71/projects/master/sonda-readiness-tcp.yml.yml` but probably you don't have configured NFS on provided address/path..
 
 - Lets assume the situation when our NFS is not ready yet. The readinessProbe will check the TCP-connection on standard NFS port (2049) and doesn't show positive outcome. In that case ReplicaSet will refrain from launching the Pod.
-
-`$ kubectl get po,deploy
+```
+kubectl get po,deploy
 NAME                            READY   STATUS              RESTARTS   AGE
 pod/sonda-tcp-7bfcd95db-hv87v   0/1     ContainerCreating   0          11s
 
 NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/sonda-tcp   0/1     1            0           11s`
+deployment.apps/sonda-tcp   0/1     1            0           11s
 
-`kubectl describe pod $(kubectl get po -o jsonpath='{.items[].metadata.name}')|grep -A5 Conditions`
-`Conditions:
+kubectl describe pod $(kubectl get po -o jsonpath='{.items[].metadata.name}')|grep -A5 Conditions
+Conditions:
   Type              Status
   Initialized       True
   Ready             False    <===
   ContainersReady   False    <===
-  PodScheduled      True`
+  PodScheduled      True
+```
 
 
 - When obstacles are overcome and the readinessProbe gives positive outcome (eg. service nfs-server is restarted and working), the creation of container proceed.
+```
+kubectl describe pod $(kubectl get po -o jsonpath='{.items[].metadata.name}')|grep -A5 Conditions`
+Conditions:
+   Type              Status
+   Initialized       True
+   Ready             True    <===
+   ContainersReady   True    <===
+   PodScheduled      True
 
-`kubectl describe pod $(kubectl get po -o jsonpath='{.items[].metadata.name}')|grep -A5 Conditions`
-`Conditions:
-  Type              Status
-  Initialized       True
-  Ready             True    <===
-  ContainersReady   True    <===
-  PodScheduled      True`
-
-`kubectl get deploy,po`
-`NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
+kubectl get deploy,po
+NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
 deployment.apps/sonda-tcp   1/1     1            1           9m35s
 
 NAME                            READY   STATUS    RESTARTS   AGE
-pod/sonda-tcp-7bfcd95db-hv87v   1/1     Running   0          9m35s`
+pod/sonda-tcp-7bfcd95db-hv87v   1/1     Running   0          9m35s
+```
 
-Rediness Probes is seen in Minikube as well. 
+Rediness Probe is seen in Minikube as well. 
+![obraz](https://github.com/maccu71/projects/assets/51779238/de056979-0c0f-4860-aa6a-0e14aeba2f2e)
+
 
 
