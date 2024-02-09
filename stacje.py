@@ -28,7 +28,7 @@ if os.path.exists(filename):
     if days_diff > days:
         download()
     else:
-        print(f'loading data from a file... it\'s only {days_diff} days old')
+        print(f'loading data from a file... it is {days_diff} days old')
 else:
     download()
 
@@ -49,7 +49,7 @@ print('\nnr   vote      bitrate      name')
 for i, y in enumerate(po_wyb):
     print(str(i+1).ljust(5, ' ') + (str(y[2]).ljust(10, ' ') + str(y[3]).ljust(13, ' ') + str(y[0])))
 
-ktora = int(input('\nWhich one you want? (enter the nr): '))
+ktora = int(input('\nWhich one you prefer? (enter the nr): '))
 urls = po_wyb[ktora-1][1]
 
 print(f'stacja: {urls}\n')

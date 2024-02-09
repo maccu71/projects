@@ -1,4 +1,4 @@
-Here you will find 5 small projects:
+Here are some projects related to my interests, including IaC, Kubernetes, Ansible, and Python programming.
 
 <br/><br/> 
 
@@ -72,7 +72,8 @@ A readinessProbe in Kubernetes serves as a mechanism to determine whether a cont
 
 You start this deployment by issuing: `kubectl apply -f https://raw.githubusercontent.com/maccu71/projects/master/sonda-readiness-tcp.yml.yml` but probably you don't have configured NFS on provided address/path..
 
-- Lets assume the situation when our NFS is not ready yet. The readinessProbe will check the TCP-connection on standard NFS port (2049) and doesn't show positive outcome. In that case ReplicaSet will refrain from launching the Pod.
+- Let's assume a situation where our NFS is not ready yet. The readinessProbe will check the TCP connection on the standard NFS port (2049) and, if it doesn't yield a positive outcome, the ReplicaSet will refrain from launching the Pod.
+
 ```
 kubectl get po,deploy
 NAME                            READY   STATUS              RESTARTS   AGE
@@ -90,8 +91,8 @@ Conditions:
   PodScheduled      True
 ```
 
+- Once obstacles are overcome, and the readinessProbe indicates a positive outcome (for example, if the NFS server service is restarted and working), the container creation will proceed.
 
-- When obstacles are overcome and the readinessProbe gives positive outcome (eg. service nfs-server is restarted and working), the creation of container proceed.
 ```
 kubectl describe pod $(kubectl get po -o jsonpath='{.items[].metadata.name}')|grep -A5 Conditions`
 Conditions:

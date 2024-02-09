@@ -1,0 +1,41 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: script
+data:
+  script.sh: |-
+    #!/bin/bash
+    apt-get update
+    apt-get install stress -y
+    for i in 1 20 40 60 80 100 120 140 ; do echo currently\: "$i"M && stress --vm 1 --vm-bytes "$i"M --timeout 30s; done
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memory
+spec:
+  selector:
+    matchLabels:
+      mem: v1
+  template:
+    metadata:
+      labels:
+        mem: v1
+    spec:
+      containers:
+        - name: vehicle
+          image: ubuntu:latest
+          resources: 
+            limits: 
+              memory: 80Mi
+          command: ['sh', '-c', '/data/script.sh']
+          volumeMounts:
+          - name: dir
+            mountPath: /data
+      volumes:
+        - name: dir
+          configMap:
+            name: script
+            defaultMode: 0777  
