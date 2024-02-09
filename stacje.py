@@ -54,17 +54,8 @@ urls = po_wyb[ktora-1][1]
 
 print(f'stacja: {urls}\n')
 
-# zapisac = input('Write your stream to a file? y/n ').lower()
-
-# if zapisac == 'y':
-#     extension = int(time.monotonic())
-#     chosen = (po_wyb[ktora-1][0]).replace(' ', '_')#.replace('\'','')
-#     filling = (f'/home/maco/Pulpit/{chosen}_{extension} -i {urls} &')  or use $PWD
-#     filling = (f'/home/maco/Pulpit/{chosen} -i {urls} &') # or use $PWD
-#     print(chosen)
-#     os.system('ffmpeg -f ogg '+ filling)
-
 def getData(url):
+    URL  = "https://api.lyrics.ovh/v1/"
     Instance = vlc.Instance()
     player = Instance.media_player_new()
     Media = Instance.media_new(url)
@@ -74,12 +65,10 @@ def getData(url):
     prev = ""
     while True:
         time.sleep(1)
-        m = Media.get_meta(12) # vlc.Meta 12: 'NowPlaying',
+        m = Media.get_meta(12) 
         if m != prev:
             print(m)
             prev = m
-#             with open(f'/home/maco/Pulpit/{chosen}.txt','a') as file:
-#                 file.write(f'{m}\n')
     return player.audio_get_track_description()
 
 print(getData(urls))
