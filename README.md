@@ -99,7 +99,7 @@ This version clarifies the potential use of a ConfigMap with a Bash script for m
 
 <br/><br/> 
 
-2) `stacje.py` - an application wrote in Python that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song. This is a really nice app that you can launch directly from your Linux console.
+2) `stacje.py` - an application written in Python that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song. This is a really nice app that you can launch directly from your Linux console.
 
 ![obraz](https://github.com/maccu71/projects/assets/51779238/ed8fc9dc-b2ab-41fe-a0d5-b0b1d88a57f6)
 
