@@ -1,4 +1,4 @@
-Here are some projects related to my interests, including IaC, Kubernetes, Ansible, and Python programming.
+Here are some projects related to my interests, including IaC, Kubernetes, Ansible or Python programming.
 
 <br/><br/> 
 
@@ -66,7 +66,7 @@ Surely, Kubernetes employs an exponential backoff mechanism, substantially incre
 This helps prevent overwhelming the system with many restarts and unnecessary resource stress.
 
 However, in my opinion, it's not an fully automatic solution, leaving room for improvement for Kubernetes developers. 
-One can imagine a situation where the default immutable `restartPolicy: Always` can be changed to, for example, `3`.
+One can imagine a situation where the default immutable `restartPolicy: Always` can be changed to some value after that Kubernetes ceased to create new Pod instances.
 
 Now you can kick out the deployment by:
 `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/memory-restriction.yml`
@@ -99,15 +99,12 @@ This version clarifies the potential use of a ConfigMap with a Bash script for m
 
 <br/><br/> 
 
-2) `stacje.py` - an application written in Python that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song. This is a really nice app that you can launch directly from your Linux console.
-
-![obraz](https://github.com/maccu71/projects/assets/51779238/ed8fc9dc-b2ab-41fe-a0d5-b0b1d88a57f6)
+2) `stacje.py` - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song. This is a really nice app that you can launch directly from your Linux console. Start the program in your linux console by issuing: `python3 stacje.py` or `./stacje.py`
 
 <br/><br/> 
 
 4) `cwicz.py` - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.
-   
-![obraz](https://github.com/maccu71/projects/assets/51779238/4cd59ca3-d49e-435e-a71b-6646fa46218e)
+![obraz](https://github.com/maccu71/projects/assets/51779238/887d3e3c-b59d-4a1c-bac3-c4e738d7160f)
 
 <br/><br/> 
 
@@ -150,7 +147,8 @@ pod/sonda-tcp-7bfcd95db-hv87v   0/1     ContainerCreating   0          11s
 
 NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
 deployment.apps/sonda-tcp   0/1     1            0           11s
-
+```
+```
 kubectl describe pod $(kubectl get po -o jsonpath='{.items[].metadata.name}')|grep -A5 Conditions
 Conditions:
   Type              Status
@@ -170,7 +168,8 @@ Conditions:
    Ready             True    <===
    ContainersReady   True    <===
    PodScheduled      True
-
+```
+```
 kubectl get deploy,po
 NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
 deployment.apps/sonda-tcp   1/1     1            1           9m35s
@@ -182,4 +181,105 @@ pod/sonda-tcp-7bfcd95db-hv87v   1/1     Running   0          9m35s
 Rediness Probe is seen in Minikube as well. 
 ![obraz](https://github.com/maccu71/projects/assets/51779238/de056979-0c0f-4860-aa6a-0e14aeba2f2e)
 
+6) `cpu-restriction.yml` - a manifest that serves as a practical demonstration of CPU restrictions implemented both at the deployment specification and the namespace quota level in Kubernetes.
+  
+You start deployment by: `kubectl apply -f https://raw.githubusercontent.com/maccu71/projects/master/cpu-restriction.yml`
+   
+We've already learned that deploying instances without memory and CPU restrictions isn't prudent. They may, in certain scenarious, consume all available resources, jeopardizing the stability of the entire cluster.
+
+Let's continue discussing restrictions on our workload in Kubernetes further, this time focusing on CPU and delving deeper into the broader concept of resource restriction.
+
+Now, we'll attempt to set CPU restrictions that apply to several components. To do this, we'll create the new namespace, a limited segment of the Kubernetes environment. This allows us to isolate resources from other components in our Kubernetes cluster, providing a clear vision.
+
+kubectl apply -f cpu-restriction.yml
+
+This command is meant to:
+
+- Create a new namespace named 'new' - be sure this name hasn't been used previously!
+- Apply restrictions to our namespace (Quota).
+- Create a simple deployment with one pod.
+
+We're applying the following constraints on our namespace (Quota) in the cpu-restriction.yml file:
+```
+spec:
+  hard:
+    requests.cpu: "250m"  
+    limits.cpu: "500m"
+```
+And CPU restrictions in the deployment specification:
+```
+resources:
+  limits:
+    cpu: 60m
+  requests:
+    cpu: 50m
+```
+We can see the CPU consumption of our pod:
+```
+kubectl top pod -n new
+NAME                              CPU(cores)   MEMORY(bytes)   
+cpu-restriction-bf756bcc6-xk6cd   2m           0Mi
+```
+Even though the existing Pod uses only 2 milliCores, the system shows different values:
+```
+kubectl describe quota -n new
+Name:         resource-quota
+Namespace:    new
+Resource      Used  Hard
+--------      ----  ----
+limits.cpu    60m   500m
+requests.cpu  50m   250m
+```
+This led us to the conclusions about:
+- Request and Limits in Quotas (on a certain Namespace). These values provide information about HARD unsurpassable limits, meaning those that cannot be exceeded - available resources for a certain namespace.
+- Requests and Limits set in deployment/pod specification. These values are meant to ALLOCATE, in other words, RESERVE a certain amount of CPU milliCores in a given Namespace.
+
+An attempt to exceed these 'HARD' limits (limits.cpu, requests.cpu) will result in denial of new resources. For example, if we try to scale the existing deployment by adding new pods and thus allocating more CPU than is possible, regardless when it comes to Requests or Limits:
+
+`kubectl scale deploy/cpu-restriction -n new --replicas=6`
+```
+kubectl get resourcequota -n new
+NAME             AGE     REQUEST                   LIMIT
+resource-quota   3h10m   requests.cpu: 250m/250m   limits.cpu: 300m/500m
+```
+```
+kubectl get pod/cpu-restriction-bf756bcc6-42lf8 -n new -o jsonpath='{.spec.containers[*].resources}'|jq
+{
+  "limits": {
+    "cpu": "60m"
+  },
+  "requests": {
+    "cpu": "50m"
+  }
+}
+```
+```
+kubectl get deploy -n new
+NAME              READY   UP-TO-DATE   AVAILABLE   AGE
+cpu-restriction   5/6     5            5           26m   <==== discrepency
+```
+
+Exactly the 6th pod won't be created because available cpu.requests (HARD limit from quota on the namespace, e.g., requests.cpu = 250m and 6(pods)*50m(cpu.requests in the pod) = 300m. Limit has already been reached.
+
+This occurs even though the real CPU Pod consumption is minimal (around 2 milliCores)
+```
+kubectl describe quota -n new
+NAME                              CPU(cores)   MEMORY(bytes)           
+cpu-restriction-bf756bcc6-m2x9b   2m           0Mi             
+```
+```
+kubectl describe quota -n new
+Name:         resource-quota
+Namespace:    new
+Resource      Used  Hard
+--------      ----  ----
+limits.cpu    300m  500m
+requests.cpu  250m  250    <=== no CPU for another reservation
+```
+
+The other scenario is when deployed applications must compete for available CPU and memory resources in the cluster above specified CPU Request (in deployment spec).
+
+To sum it up - we can regard Requests values in the deployment/pod specification as reserved ones. It can be exceedeed when some application is more demanding in terms of CPU/memory AND there are free available resources in namespace. In that case, the application will consume CPU until it reaches its HARD limit in the form of cpu.limits (set in the deployment spec). After that, it will be throttled.
+
+To kick out all resources you might issue : `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/cpu-restriction.yml` or simply: `kubectl delete --all -n new`
 
