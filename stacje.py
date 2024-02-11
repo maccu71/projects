@@ -55,7 +55,6 @@ urls = po_wyb[ktora-1][1]
 print(f'stacja: {urls}\n')
 
 def getData(url):
-    URL  = "https://api.lyrics.ovh/v1/"
     Instance = vlc.Instance()
     player = Instance.media_player_new()
     Media = Instance.media_new(url)
