@@ -36,6 +36,7 @@ spec:
         - name: cpu
           image: ubuntu:latest
           command: ['sh','-c','while true; do date & sleep 2; done']
+        # command: ['sh','-c','apt update && apt-get install bc -y && while true; do echo "scale=1000; a(1)*4" | bc -l & sleep 1; done']
           resources:
             limits:
               cpu: 60m
