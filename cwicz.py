@@ -18,7 +18,7 @@ print(f'\nDays after you started: {Days}')
 
 czas = 60 * minuty + sekundy  # conversion minutes and sesonds to total seconds
 
-with open("cwicz_SECONDS.dump", "r") as fs:
+with open("cwicz.dump", "r") as fs:
     druga = json.load(fs)
 
 lista = []
@@ -61,7 +61,7 @@ odp = input("save the output? y/n ")
 print()
 if odp.lower() == "y":
     druga[str(Days)] = czas
-    with open("cwicz_SECONDS.dump", "w") as file:
+    with open("cwicz.dump", "w") as file:
         json.dump(druga, file)
 
 # show results in a list form
