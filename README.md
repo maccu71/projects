@@ -181,8 +181,13 @@ pod/sonda-tcp-7bfcd95db-hv87v   1/1     Running   0          9m35s
 Rediness Probe is seen in Minikube as well. 
 ![obraz](https://github.com/maccu71/projects/assets/51779238/de056979-0c0f-4860-aa6a-0e14aeba2f2e)
 
+<br/><br/>
 6) `cpu-restriction.yml` - a manifest that serves as a practical demonstration of CPU restrictions implemented both at the deployment specification and the namespace quota level in Kubernetes.
-  
+
+At the very beginning, let's dive into `the concept of milliCores` in Kubernetes. Essentially, it is designed to provide fine-grained control over available CPU resources. In this context, a full core, which is traditionally measured in gigabytes (1G), is divided into 1000 particles known as milliCores. This division allows for more precise and granular constraints on resource allocation.
+
+Moreover, the use of milliCores offers a more user-friendly representation. For instance, it is much clearer to express resource usage as 50 milliCores rather than 0.05 cores. This not only enhances clarity but also makes resource management more intuitive and visually appealing.
+
 You start deployment by: `kubectl apply -f https://raw.githubusercontent.com/maccu71/projects/master/cpu-restriction.yml`
    
 We've already learned that deploying instances without memory and CPU restrictions isn't prudent. They may, in certain scenarious, consume all available resources, jeopardizing the stability of the entire cluster.
@@ -214,13 +219,13 @@ resources:
   requests:
     cpu: 50m
 ```
-We can see the CPU consumption of our pod:
+We can see the CPU consumption of our Pod:
 ```
 kubectl top pod -n new
 NAME                              CPU(cores)   MEMORY(bytes)   
 cpu-restriction-bf756bcc6-xk6cd   2m           0Mi
 ```
-Even though the existing Pod uses only 2 milliCores, the system shows different values:
+Even though the existing Pod uses only 2 milliCores, the system reserved for it the whooping 50 milliCores:
 ```
 kubectl describe quota -n new
 Name:         resource-quota
@@ -230,11 +235,11 @@ Resource      Used  Hard
 limits.cpu    60m   500m
 requests.cpu  50m   250m
 ```
-This led us to the conclusions about:
-- Request and Limits in Quotas (on a certain Namespace). These values provide information about HARD unsurpassable limits, meaning those that cannot be exceeded - available resources for a certain namespace.
+This led us to the conclusions about Quotas in a namespaces:
+- Request and Limits in Quotas. These values provide information about HARD unsurpassable limits, meaning those values cannot be exceeded - there are available resources for a certain namespace.
 - Requests and Limits set in deployment/pod specification. These values are meant to ALLOCATE, in other words, RESERVE a certain amount of CPU milliCores in a given Namespace.
 
-An attempt to exceed these 'HARD' limits (limits.cpu, requests.cpu) will result in denial of new resources. For example, if we try to scale the existing deployment by adding new pods and thus allocating more CPU than is possible, regardless when it comes to Requests or Limits:
+An attempt to exceed these 'HARD' limits (limits.cpu, requests.cpu) will result in denial of creation new resources. For example, if we try to scale the existing deployment by adding new pods and thus allocating more CPU than is possible, regardless when it comes to Requests or Limits:
 
 `kubectl scale deploy/cpu-restriction -n new --replicas=6`
 ```
@@ -263,7 +268,7 @@ Exactly the 6th pod won't be created because available cpu.requests (HARD limit 
 
 This occurs even though the real CPU Pod consumption is minimal (around 2 milliCores)
 ```
-kubectl describe quota -n new
+kubectl  top pod -n new
 NAME                              CPU(cores)   MEMORY(bytes)           
 cpu-restriction-bf756bcc6-m2x9b   2m           0Mi             
 ```
@@ -276,21 +281,23 @@ Resource      Used  Hard
 limits.cpu    300m  500m
 requests.cpu  250m  250    <=== no CPU for another reservation
 ```
-
+<br/><br/>
 The other scenario is when deployed applications must compete for available CPU and memory resources in the cluster above specified CPU Request (in deployment spec).
 
-Now, you may want to change the peaceful command line.. in cpu-restriction.yml 
+Now, you may want to change the peaceful `['sh','-c','while true; do date & sleep 2; done']` in cpu-restriction.yml 
 ```
       containers:
         - name: cpu
           image: ubuntu:latest
           command: ['sh','-c','while true; do date & sleep 2; done']
 ```
-..with something more CPU-intensive, I mean a few bash line making it much more CPU-intensive. It is intended to calculate the PI number with high accuracy using binary calcuator (bc).  
+<br/>
+..with one bash line that causes the whole thing more CPU-intensive:   
 `command: ['sh','-c','apt update && apt-get install bc -y && while true; do echo "scale=1000; a(1)*4" | bc -l & sleep 1; done']`
+By the way, It is a simple way aimed to calculate the PI number with high accuracy using a basic calculator (bc).
 
 Restart the deployment with `kubectl apply -f cpu-restriction -n new` this time locally.
-Now, we are not constraint with quota in the namespace (because we have enough CPU resources), but CPU contraints in our deployment spec:  
+Now, we are not constraint with quota in the namespace (we have enough CPU resources), but CPU contraints in our deployment spec:  
 
 ```
 kubectl get pod $(kubectl get po -n new -o jsonpath='{.items[*].metadata.name}') -n new -o jsonpath='{.spec.containers[*].resources}'|jq
@@ -308,13 +315,12 @@ kubectl  top pod -n new
 NAME                               CPU(cores)   MEMORY(bytes)
 cpu-restriction-5b6988d7dd-nl5h2   60m          87Mi    <=== CPU exceded cpu.requests but cannot exceed cpu.limits from deployment spec  
 ```
+The exercise also depends on the performance of our processors. Your CPU unit is likely much more agile than mine, so the results may differ. You can experiment with the 'Limits' and 'Requests' in the specification, as well as the 'scale' variable in the container command. Increasing the 'scale' will stress the CPU unit more.
 
-The exercise also depends on the performance of our processor. Your CPU unit is probably much agile that mine, thus the results can be different. 
-You might want to experiment with Limits and Request in the specification as well as variable 'scale' in a container command. Making it bigger will stress the CPU unit much more. 
+To sum it up, we arrive at the following conclusions:
 
-To sum it up - we come to the following conclusions:
-- Requests - are considered as vital information in the deployment/pod specification on how many resources should be reserved. They are SOFT values. It means they can be exceedeed IF some application is more demanding in terms of CPU/memory AND there are free available resources in a namespace. 
-- Limits - impassable, final, HARD limits. The application will not be able to exceed these values (it will be throttled).
+- 'Requests' are considered vital information in the deployment/pod specification, indicating how many resources should be reserved. They are SOFT values, meaning they can be exceeded if some application is more demanding in terms of CPU/memory, and there are free available resources in a namespace.
+- 'Limits' are impassable, final, HARD limits. The application will not be able to exceed these values; it will be throttled."
 
 To kick out all resources you might issue : `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/cpu-restriction.yml` or simply: `kubectl delete --all -n new`
 
