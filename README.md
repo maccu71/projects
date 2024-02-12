@@ -73,7 +73,7 @@ Now you can kick out the deployment by:
 
 <br/><br/> 
 
-2) `init-containers-usage` - a helm package that illustrates how to use init-containers in Kubernetes cluster. 
+2) `init-containers-usage` - a helm package that illustrates the concept of init-containers in Kubernetes cluster. 
 
 ![obraz](https://github.com/maccu71/projects/assets/51779238/d982af6a-e8ef-4a85-b30a-4619db6070a1)
 
