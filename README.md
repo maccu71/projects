@@ -284,9 +284,13 @@ requests.cpu  250m  250    <=== no CPU for another reservation
 <br/><br/>
 The other scenario is when deployed applications must compete for available CPU and memory resources in the cluster above specified CPU Request (in deployment spec).
 
+<<<<<<< HEAD
 Now, you may want to change the peaceful 
 `['sh','-c','while true; do date & sleep 2; done']` 
 in cpu-restriction.yml 
+=======
+Now, you may want to change the peaceful `['sh','-c','while true; do date & sleep 2; done']` in cpu-restriction.yml 
+>>>>>>> 8e5755ab0820a7c375ca892e340c4222130b30c7
 ```
       containers:
         - name: cpu
