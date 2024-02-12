@@ -296,7 +296,12 @@ in cpu-restriction.yml
 ```
 <br/>
 ..with one bash line that causes the whole thing more CPU-intensive:   
-```command: ['sh','-c','apt update && apt-get install bc -y && while true; do echo "scale=1000; a(1)*4" | bc -l & sleep 1; done']```
+
+```
+command: ['sh','-c','apt update && apt-get install bc -y && while true; do echo "scale=1000; a(1)*4" | bc -l & sleep 1; done']
+```
+
+<br/>
 By the way, It is a simple way aimed to calculate the PI number with high accuracy using a basic calculator (bc).
 
 Restart the deployment with `kubectl apply -f cpu-restriction -n new` this time locally.
