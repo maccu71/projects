@@ -252,11 +252,16 @@ This version clarifies the potential use of a ConfigMap with a Bash script for m
 
 <br/><br/> 
 
-4) `stacje.py` - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song. This is a really nice app that you can launch directly from your Linux console. Start the program in your linux console by issuing: `python3 stacje.py` or `./stacje.py`
+**4) `stacje.py` - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.**
+
+ This is a really nice app that you can launch directly from your Linux console. Start the program in your linux console by issuing: 
+`python3 stacje.py` 
+or just 
+`./stacje.py`
 
 <br/><br/> 
 
-5) `cwicz.py` - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.
+**5) `cwicz.py` - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.**
 ![obraz](https://github.com/maccu71/projects/assets/51779238/887d3e3c-b59d-4a1c-bac3-c4e738d7160f)
 
 <br/><br/> 
@@ -269,8 +274,8 @@ The application is designed to manage and clean up resources within a Kubernetes
 
 Key Components:
 
-   a) Cleaner Script/Container
-   b) Kubernetes RBAC Rules
+- Cleaner Script/Container
+- Kubernetes RBAC Rules (we say about them later)
 
 Use Case Scenario:
 
@@ -283,7 +288,7 @@ To delete leftovers (RBAC rules) you can proceed with a command:
 
 <br/><br/> 
 
-7) `sonda-readiness-tcp.yml` - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers. 
+**7) `sonda-readiness-tcp.yml` - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers.** 
 
 In this case, the readinessProbe is utilized to validate the availability of my local NFS service before bringing to life the container
 
@@ -330,7 +335,5 @@ deployment.apps/sonda-tcp   1/1     1            1           9m35s
 NAME                            READY   STATUS    RESTARTS   AGE
 pod/sonda-tcp-7bfcd95db-hv87v   1/1     Running   0          9m35s
 ```
-
-Rediness Probe is seen in Minikube as well. 
-![obraz](https://github.com/maccu71/projects/assets/51779238/de056979-0c0f-4860-aa6a-0e14aeba2f2e)
-
+Kick it out by issuing:
+`kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/sonda-readiness-tcp.yml`
