@@ -224,6 +224,52 @@ To sum it up, we arrive at the following conclusions:
 
 To kick out all resources you might issue : `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/cpu-restriction.yml` or simply: `kubectl delete --all -n new`
 
+<br/>
+
+Now, let's dive into the particularies of `Quality of Service - QoS` within our deployed pods, tightly linked with mentioned CPU and memory restrictions.
+
+We're dealing with three amigos here: BestEffort, Burstable, and Guaranteed. Let's break down each one and unravel their differences.
+
+`Guaranteed`
+
+In this VIP category, CPU and memory values are like best buds:
+```
+resources:
+  limits:
+    cpu: 100m
+    memory: 200Mi
+  requests:
+    cpu: 100m
+    memory: 200Mi
+```
+When you run `kubectl describe pod -n new | grep QoS`, you'll see it proudly having the title `QoS Class: Guaranteed`. Top-notch service guaranteed; Kubernetes treats these pods with the utmost respect, messing with them only if absolutely necessary.
+
+`Burstable`
+
+This is the flexible friend in the group. The CPU and memory limits and requests are like dance partners, but they can have different moves:
+```
+resources:
+  limits:
+    cpu: 60m
+    memory: 200Mi
+  requests:
+    cpu: 50m
+    memory: 100Mi
+```
+Peek at `kubectl describe pod -n new | grep QoS`, and you'll find it rocking the `QoS Class: Burstable` label. It is adjusting its resources based on demand.
+
+`- BestEffort`
+
+Here's the wild card. Whether you skip specifying CPU/memory altogether (not recommended, by the way), or if the requests and limits don't match, you're in BestEffort territory:
+
+Example situations falling into BestEffort:
+- CPU/memory not specified at all (not cool)
+- CPU.requests and CPU.limits mismatch
+- Memory.requests and Memory.limits mismatch
+
+When you `kubectl get pod -n new -o yaml | grep qosClass`, it shows `qosClass: BestEffort`. It's the low-key player; when resources get tight, these pods step aside first, giving priority to their Guaranteed and Burstable counterparts.
+
+
 <br/><br/>
 
 **3) `init-containers-usage` - a helm package that illustrates the concept of init-containers in Kubernetes cluster.** 
@@ -236,7 +282,24 @@ To install this deployment with its service you need to:
 - you'll see the picture from NASA server on your browser:   `localhost:$(kubectl get service my-release -o jsonpath='{.spec.ports[*].nodePort}'|jq)`  
 OR if you use Minikube just: `minikube service my-release`
 
-Init containers in Kubernetes are lightweight, transient containers that run and complete before the main application containers start. They are designed to perform initialization tasks, setup, or any necessary preparations before the main application containers in a pod begin running.
+Init containers in Kuberneteso are lightweight, transient containers that run and complete before the main application containers start. They are designed to perform initialization tasks, setup, or any necessary preparations before the main application containers in a pod begin running.
+
+```
+spec:
+  initContainers:
+    - name: init-1
+      image: ubuntu:latest
+      command: ['sh','-c','apt update && apt-get install wget -y  && wget -O /data/one.jpg -q "https://apod.nasa.gov/apod/image/2312/ArcticNight_Cobianchi_2048.jpg"']
+      volumeMounts:
+        - name: html
+          mountPath: /data
+    - name: init-2
+      [...]
+
+  containers: 
+    - name: web
+      image: nginx:latest
+```
 
 Key points about init containers:
 
