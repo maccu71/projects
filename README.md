@@ -222,13 +222,11 @@ To sum it up, we arrive at the following conclusions:
 - 'Requests' are considered vital information in the deployment/pod specification, indicating how many resources should be reserved. They are SOFT values, meaning they can be exceeded if some application is more demanding in terms of CPU/memory, and there are free available resources in a namespace.
 - 'Limits' are impassable, final, HARD limits. The application will not be able to exceed these values; it will be throttled."
 
-To kick out all resources you might issue : `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/cpu-restriction.yml` or simply: `kubectl delete --all -n new`
+<br/><br/> 
 
-<br/>
+You might want to kick out all resources by: `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/cpu-restriction.yml` or simply: `kubectl delete --all -n new` but let's dive into the particularies of `Quality of Service - QoS` within our deployed pods, tightly linked with mentioned CPU and memory restrictions.
 
-Now, let's dive into the particularies of `Quality of Service - QoS` within our deployed pods, tightly linked with mentioned CPU and memory restrictions.
-
-We're dealing with three amigos here: BestEffort, Burstable, and Guaranteed. Let's break down each one and unravel their differences.
+We're dealing with three amigos here: `BestEffort, Burstable, and Guaranteed`. Let's break down each one and unravel their differences.
 
 `Guaranteed`
 
@@ -242,11 +240,11 @@ resources:
     cpu: 100m
     memory: 200Mi
 ```
-When you run `kubectl describe pod -n new | grep QoS`, you'll see it proudly having the title `QoS Class: Guaranteed`. Top-notch service guaranteed; Kubernetes treats these pods with the utmost respect, messing with them only if absolutely necessary.
+When you run `kubectl describe pod -n new | grep QoS`, you'll see it proudly having the title `QoS Class: Guaranteed`. The best service guaranteed; Kubernetes treats these pods with the utmost respect, messing with them only if absolutely necessary. These pods have a fixed amount of resources allocated to them. They won't get more, and they won't get less, ensuring a stable environment.
 
 `Burstable`
 
-This is the flexible friend in the group. The CPU and memory limits and requests are like dance partners, but they can have different moves:
+This is the flexible friend in the group. The CPU and/or memory limits and requests are different:
 ```
 resources:
   limits:
@@ -256,7 +254,7 @@ resources:
     cpu: 50m
     memory: 100Mi
 ```
-Peek at `kubectl describe pod -n new | grep QoS`, and you'll find it rocking the `QoS Class: Burstable` label. It is adjusting its resources based on demand.
+Peek at `kubectl describe pod -n new | grep QoS`, and you'll find it having the `QoS Class: Burstable` label. Pods in this category get a minimum amount of resources but can use more if available (until limits - if specified).
 
 `- BestEffort`
 
@@ -267,7 +265,7 @@ Example situations falling into BestEffort:
 - CPU.requests and CPU.limits mismatch
 - Memory.requests and Memory.limits mismatch
 
-When you `kubectl get pod -n new -o yaml | grep qosClass`, it shows `qosClass: BestEffort`. It's the low-key player; when resources get tight, these pods step aside first, giving priority to their Guaranteed and Burstable counterparts.
+When you `kubectl get pod -n new -o yaml | grep qosClass`, it shows `qosClass: BestEffort`. Pods in this category get whatever resources are available but it's the low-key player; when resources get tight, these pods are "released" first, giving priority to their Guaranteed and Burstable counterparts. So they may struggle if resources are constrained.
 
 
 <br/><br/>
