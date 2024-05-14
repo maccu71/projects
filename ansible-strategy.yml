@@ -1,0 +1,13 @@
+---
+- name: applying different strategies
+  strategy: host_pinned
+  # strategy: free
+  # strategy: linear - default strategy (no need to specify it)
+  # strategy: debug
+  hosts: all
+  tasks:
+    - name: first task
+      shell: sleep 2
+    - name: second task
+      shell: sleep 2
+
