@@ -1,0 +1,19 @@
+---
+- name: error handling example
+  hosts: all
+  tasks:
+    - name: error handling block
+      block: 
+        - name: successful task
+          debug: 
+            msg: 'first task OK..'
+        - name: intentional error
+          command: cat /nothinghere
+      rescue: 
+        - name: actions when task in block encounders an error 
+          debug:
+            msg: 'we encoundered error..'
+      always:
+        - name: tasks always done
+          debug: 
+            msg: 'a task from Always block of code'

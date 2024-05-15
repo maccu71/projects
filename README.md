@@ -398,3 +398,77 @@ pod/sonda-tcp-7bfcd95db-hv87v   1/1     Running   0          9m35s
 ```
 Kick it out by issuing:
 `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/sonda-readiness-tcp.yml`
+
+
+Grouping tasks using the 'block' directive in Ansible
+
+Have you ever wondered what the 'block' directive in Ansible is and what its exact purpose is?
+
+Let's clarify and highlight its beneficial role.
+
+There are two main ways we can utilize the 'block' directive:
+
+    Grouping tasks as a single unit: This helps to apply logic effectively.
+    Handling errors elegantly: This is achieved through the Block-Rescue-Always directives.
+
+For instance, let's say we want to install the Apache server on CentOS nodes. This involves installing the httpd package, copying files, changing config files, copying website code, and finally, restarting the httpd service. While we could include "- when: ansible_distribution == CentOS'" after each task, it would be impractical, making the code unreadable and unprofessional.
+
+Here's where the Block directive comes to the rescue.
+
+A simple example using the block directive (simplified for the purpose):
+
+yaml
+
+---
+- name: example using block
+  gather_facts: yes
+  hosts: all
+  tasks:
+    - name: install Apache
+      block:
+        - name: install package http
+          yum:
+            name: httpd
+            state: latest
+        - name: restart service httpd
+          service:
+            name: httpd
+            state: restarted
+      when: ansible_distribution == 'CentOS'
+
+Here, we don't need to apply the 'when' clause after each task. This allows us to apply logic to our code more efficiently.
+
+By the way, this is not the only way to handle different OS in Ansible playbooks; you can also use the group_by module, for example.
+
+The second important role is applying the 'block' directive to handle errors in playbooks, as seen below:
+
+---
+- name: error handling example
+  hosts: all
+  tasks:
+    - name: error handling block
+      block:
+        - name: successful task
+          debug:
+            msg: 'first task OK..'
+        - name: intentional error
+          command: cat /nothinghere
+      rescue:
+        - name: actions when task in block encounters an error
+          debug:
+            msg: 'we encountered an error..'
+      always:
+        - name: tasks always done
+          debug:
+            msg: 'a task from the Always block of code'
+
+And here are some rules to follow:
+
+  i aTasks in the 'block' directive are performed sequentially, unless they fail.
+    Tasks in the Rescue directive start only if at least one in the 'block' finished with an error.
+    If there are errors in the Rescue block of code, the program jumps to the Always tasks.
+    Finally, tasks in the Always block of code are performed independently of the previous 'Block' and 'Rescue' outcomes.
+
+This allows us to apply another layer of logic to our Ansible code. Isn't it beautiful?
+
+This method, combined with a debug strategy, allows us to precisely identify the type of error encountered. We'll delve into 'debug' mode later on.
