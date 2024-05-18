@@ -1,4 +1,17 @@
-Here are some projects related to my interests, including IaC, Kubernetes, Ansible or Python programming.
+**Here are some projects related to my interests, including:
+1) Kubernetes - examples:**
+- memory-restriction.yml - Explores the concept of resource allocation and memory restriction in K8S
+- cpu-restriction.yml - a manifest that serves as a practical demonstration of CPU restrictions implemented both at the deployment specification and the namespace quota level in Kubernetes
+- init-containers-usage - a helm package that illustrates the concept of init-containers in Kubernetes cluster
+- cleaner.yml - kubernetes manifest intended to clean unnecessary resources from kubernetes cluster (use with caution)
+- sonda-readiness-tcp.yml - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers.
+
+2) Ansible - examples:
+- 'block' directive in Ansible - usage
+
+3) Python - examples:
+- stacje.py - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.
+- cwicz.py - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.
 
 <br/><br/> 
 
@@ -400,16 +413,15 @@ Kick it out by issuing:
 `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/sonda-readiness-tcp.yml`
 
 
-Grouping tasks using the 'block' directive in Ansible
+**'block' directive in Ansible - usage: **
 
 Have you ever wondered what the 'block' directive in Ansible is and what its exact purpose is?
 
 Let's clarify and highlight its beneficial role.
 
 There are two main ways we can utilize the 'block' directive:
-
-    Grouping tasks as a single unit: This helps to apply logic effectively.
-    Handling errors elegantly: This is achieved through the Block-Rescue-Always directives.
+1) Grouping tasks as a single unit: This helps to apply logic effectively.
+2) Handling errors elegantly: This is achieved through the Block-Rescue-Always directives.
 
 For instance, let's say we want to install the Apache server on CentOS nodes. This involves installing the httpd package, copying files, changing config files, copying website code, and finally, restarting the httpd service. While we could include "- when: ansible_distribution == CentOS'" after each task, it would be impractical, making the code unreadable and unprofessional.
 
@@ -438,9 +450,9 @@ yaml
 
 Here, we don't need to apply the 'when' clause after each task. This allows us to apply logic to our code more efficiently.
 
-By the way, this is not the only way to handle different OS in Ansible playbooks; you can also use the group_by module, for example.
+By the way, this is not the only way to handle different OS in Ansible playbooks; you can use for example 'group_by' module, for example.
 
-The second important role is applying the 'block' directive to handle errors in playbooks, as seen below:
+The second important role is applying the 'block' directive to handle errors in playbook, as seen below:
 
 ---
 - name: error handling example
@@ -464,11 +476,115 @@ The second important role is applying the 'block' directive to handle errors in 
 
 And here are some rules to follow:
 
-  i aTasks in the 'block' directive are performed sequentially, unless they fail.
-    Tasks in the Rescue directive start only if at least one in the 'block' finished with an error.
-    If there are errors in the Rescue block of code, the program jumps to the Always tasks.
-    Finally, tasks in the Always block of code are performed independently of the previous 'Block' and 'Rescue' outcomes.
+- Tasks in the 'block' directive are performed sequentially, unless they fail.
+- Tasks in the Rescue directive start only if at least one in the 'block' finished with an error.
+- If there are errors in the Rescue block of code, the program jumps to the Always tasks.
+- Finally, tasks in the Always block of code are performed independently of the previous 'Block' and 'Rescue' outcomes.
 
 This allows us to apply another layer of logic to our Ansible code. Isn't it beautiful?
 
 This method, combined with a debug strategy, allows us to precisely identify the type of error encountered. We'll delve into 'debug' mode later on.
+
+**Understanding Ansible Strategies**
+
+In this example, we'll explore and discuss the different strategies available in Ansible.
+```
+---
+- name: applying different strategies
+  strategy: host_pinned
+  # strategy: free
+  # strategy: linear - implicitly default (no need to specify it)
+  # strategy: debug
+  hosts: all
+  tasks:
+    - name: first task
+      shell: sleep 2
+    - name: second task
+      shell: sleep 2
+```
+Ansible offers several strategies for executing tasks in playbooks. You might wonder what these strategies are and how they function. Let's break it down.
+
+To list the available strategies, you can use the following command:
+
+$ ansible-doc -t strategy -l
+ansible.builtin.debug       Executes tasks in an interactive debug session
+ansible.builtin.free        Executes tasks without waiting for all hosts
+ansible.builtin.host_pinned Executes tasks on each host without interruption...
+ansible.builtin.linear      Executes tasks in a linear fashion
+
+Using the -t switch, we can access plugin information in Ansible.
+
+By default, Ansible employs the 'Linear' strategy (that mean's you need not specify in in your playbook) and tasks are executed sequentially, maintaining order and ensuring dependencies are met across hosts. Let's see how looks like the 'Linear' strategy:
+
+```
+$ ansible-playbook strategy.yml -f 1
+PLAY [applying different strategies] ********************************************************************************************************
+
+TASK [first task] ***************************************************************************************************************************
+changed: [192.168.122.201]
+changed: [192.168.122.202]
+changed: [192.168.122.203]
+
+TASK [second task] **************************************************************************************************************************
+changed: [192.168.122.201]
+changed: [192.168.122.202]
+changed: [192.168.122.203]
+```
+
+While the 'Linear' strategy provides order and predictability, it may slow down execution, especially with a large number of hosts.
+
+The 'Host Pinned' strategy, on the other hand, executes tasks on each host without interruption. Setting the number of forks to 1 ensures sequential execution, revealing the precise task sequence.
+
+Let's uncomment the line with: #strategy: host_pinned in strategy.yml and run it. Executing tasks with the 'Host Pinned' strategy gave us the following input:
+
+```
+$ ansible-playbook strategy.yml -f 1
+
+PLAY [applying different strategies] ********************************************************************************************************
+
+TASK [first task] ***************************************************************************************************************************
+changed: [192.168.122.203]
+
+TASK [second task] **************************************************************************************************************************
+changed: [192.168.122.203]
+
+TASK [first task] ***************************************************************************************************************************
+changed: [192.168.122.201]
+
+TASK [second task] **************************************************************************************************************************
+changed: [192.168.122.201]
+
+TASK [first task] ***************************************************************************************************************************
+changed: [192.168.122.202]
+
+TASK [second task] **************************************************************************************************************************
+changed: [192.168.122.202]
+```
+
+As you have seen - all tasks were performed on one host (or on group of hosts if we didn't specify 'fork' directive or give -f more than one) and to the other, and so on.  
+
+And lastly - executing tasks with the 'Free' strategy:
+We need to uncmment the line: 
+`# strategy: free`
+
+```
+PLAY [applying different strategies] ********************************************************************************************************
+
+TASK [first task] ***************************************************************************************************************************
+changed: [192.168.122.203]
+changed: [192.168.122.201]
+changed: [192.168.122.202]
+
+TASK [second task] **************************************************************************************************************************
+changed: [192.168.122.203]
+changed: [192.168.122.201]
+changed: [192.168.122.202]
+```
+
+Lastly, the 'Debug' strategy operates similarly to 'Linear', but with debug information returned. We'll delve into this strategy further in a separate example.
+
+Conclusion: choosing the appropriate strategy depends on factors such as inventory size, task nature, and the desired balance between predictability and speed.
+
+Additionally, we can specify the default strategy using the ANSIBLE_STRATEGY environmental variable or by configuring it in the ansible.cfg file for all playbooks.
+
+
