@@ -1,8 +1,10 @@
 **Here are some projects related to my interests, including:**
+<br/>
 **1) Kubernetes - examples:**
 - memory-restriction.yml - Explores the concept of resource allocation and memory restriction in K8S
 - cpu-restriction.yml - a manifest that serves as a practical demonstration of CPU restrictions implemented both at the deployment specification and the namespace quota level in Kubernetes
-- init-containers-usage - a helm package that illustrates the concept of init-containers in Kubernetes cluster
+- diving into the particularies of Quality of Service - QoS 
+- init-containers-usage - a helm package that illustrates the oncept of init-containers in Kubernetes cluster
 - cleaner.yml - kubernetes manifest intended to clean unnecessary resources from kubernetes cluster (use with caution)
 - sonda-readiness-tcp.yml - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers.
 
@@ -236,9 +238,12 @@ To sum it up, we arrive at the following conclusions:
 - 'Requests' are considered vital information in the deployment/pod specification, indicating how many resources should be reserved. They are SOFT values, meaning they can be exceeded if some application is more demanding in terms of CPU/memory, and there are free available resources in a namespace.
 - 'Limits' are impassable, final, HARD limits. The application will not be able to exceed these values; it will be throttled."
 
-<br/><br/> 
+<br/> 
 
 You might want to kick out all resources by: `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/cpu-restriction.yml` or simply: `kubectl delete --all -n new` but let's dive into the particularies of `Quality of Service - QoS` within our deployed pods, tightly linked with mentioned CPU and memory restrictions.
+
+<br/><br/>
+**diving into the particularies of Quality of Service - QoS**
 
 We're dealing with three amigos here: `BestEffort, Burstable, and Guaranteed`. Let's break down each one and unravel their differences.
 
@@ -284,7 +289,7 @@ When you `kubectl get pod -n new -o yaml | grep qosClass`, it shows `qosClass: B
 
 <br/><br/>
 
-**3) `init-containers-usage` - a helm package that illustrates the concept of init-containers in Kubernetes cluster.** 
+**`init-containers-usage` - a helm package that illustrates the concept of init-containers in Kubernetes cluster** 
 
 ![obraz](https://github.com/maccu71/projects/assets/51779238/d982af6a-e8ef-4a85-b30a-4619db6070a1)
 
@@ -327,7 +332,7 @@ This version clarifies the potential use of a ConfigMap with a Bash script for m
 
 <br/><br/> 
 
-**4) `stacje.py` - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.**
+**`stacje.py` - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.**
 
  This is a really nice app that you can launch directly from your Linux console. Start the program in your linux console by issuing: 
 `python3 stacje.py` 
@@ -336,7 +341,7 @@ or just
 
 <br/><br/> 
 
-**5) `cwicz.py` - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.**
+**`cwicz.py` - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.**
 ![obraz](https://github.com/maccu71/projects/assets/51779238/887d3e3c-b59d-4a1c-bac3-c4e738d7160f)
 
 <br/><br/> 
