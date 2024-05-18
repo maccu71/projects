@@ -1,15 +1,16 @@
-**Here are some projects related to my interests, including:
-1) Kubernetes - examples:**
+**Here are some projects related to my interests, including:**
+**1) Kubernetes - examples:**
 - memory-restriction.yml - Explores the concept of resource allocation and memory restriction in K8S
 - cpu-restriction.yml - a manifest that serves as a practical demonstration of CPU restrictions implemented both at the deployment specification and the namespace quota level in Kubernetes
 - init-containers-usage - a helm package that illustrates the concept of init-containers in Kubernetes cluster
 - cleaner.yml - kubernetes manifest intended to clean unnecessary resources from kubernetes cluster (use with caution)
 - sonda-readiness-tcp.yml - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers.
 
-2) Ansible - examples:
+**2) Ansible - examples:**
 - 'block' directive in Ansible - usage
+- 'Understanding different strategies in Ansible'
 
-3) Python - examples:
+**3) Python - examples:**
 - stacje.py - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.
 - cwicz.py - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.
 
@@ -413,7 +414,7 @@ Kick it out by issuing:
 `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/sonda-readiness-tcp.yml`
 
 
-**'block' directive in Ansible - usage: **
+**'block' directive in Ansible - usage:**
 
 Have you ever wondered what the 'block' directive in Ansible is and what its exact purpose is?
 
@@ -429,8 +430,7 @@ Here's where the Block directive comes to the rescue.
 
 A simple example using the block directive (simplified for the purpose):
 
-yaml
-
+```
 ---
 - name: example using block
   gather_facts: yes
@@ -447,13 +447,13 @@ yaml
             name: httpd
             state: restarted
       when: ansible_distribution == 'CentOS'
-
+```
 Here, we don't need to apply the 'when' clause after each task. This allows us to apply logic to our code more efficiently.
 
 By the way, this is not the only way to handle different OS in Ansible playbooks; you can use for example 'group_by' module, for example.
 
 The second important role is applying the 'block' directive to handle errors in playbook, as seen below:
-
+```
 ---
 - name: error handling example
   hosts: all
@@ -473,7 +473,7 @@ The second important role is applying the 'block' directive to handle errors in 
         - name: tasks always done
           debug:
             msg: 'a task from the Always block of code'
-
+```
 And here are some rules to follow:
 
 - Tasks in the 'block' directive are performed sequentially, unless they fail.
@@ -485,7 +485,7 @@ This allows us to apply another layer of logic to our Ansible code. Isn't it bea
 
 This method, combined with a debug strategy, allows us to precisely identify the type of error encountered. We'll delve into 'debug' mode later on.
 
-**Understanding Ansible Strategies**
+**Understanding different Ansible Strategies**
 
 In this example, we'll explore and discuss the different strategies available in Ansible.
 ```
@@ -505,16 +505,16 @@ In this example, we'll explore and discuss the different strategies available in
 Ansible offers several strategies for executing tasks in playbooks. You might wonder what these strategies are and how they function. Let's break it down.
 
 To list the available strategies, you can use the following command:
-
+```
 $ ansible-doc -t strategy -l
 ansible.builtin.debug       Executes tasks in an interactive debug session
 ansible.builtin.free        Executes tasks without waiting for all hosts
 ansible.builtin.host_pinned Executes tasks on each host without interruption...
 ansible.builtin.linear      Executes tasks in a linear fashion
-
+```
 Using the -t switch, we can access plugin information in Ansible.
 
-By default, Ansible employs the 'Linear' strategy (that mean's you need not specify in in your playbook) and tasks are executed sequentially, maintaining order and ensuring dependencies are met across hosts. Let's see how looks like the 'Linear' strategy:
+By default, Ansible employs the `'Linear'` strategy (that mean's you need not specify in in your playbook) and tasks are executed sequentially, maintaining order and ensuring dependencies are met across hosts. Let's see how looks like the 'Linear' strategy:
 
 ```
 $ ansible-playbook strategy.yml -f 1
@@ -533,9 +533,9 @@ changed: [192.168.122.203]
 
 While the 'Linear' strategy provides order and predictability, it may slow down execution, especially with a large number of hosts.
 
-The 'Host Pinned' strategy, on the other hand, executes tasks on each host without interruption. Setting the number of forks to 1 ensures sequential execution, revealing the precise task sequence.
+The `'Host Pinned'` strategy, on the other hand, executes tasks on each host without interruption. Setting the number of forks to 1 ensures sequential execution, revealing the precise task sequence.
 
-Let's uncomment the line with: #strategy: host_pinned in strategy.yml and run it. Executing tasks with the 'Host Pinned' strategy gave us the following input:
+Let's uncomment the line with: `#strategy: host_pinned` in strategy.yml and run it. Executing tasks with the 'Host Pinned' strategy gave us the following input:
 
 ```
 $ ansible-playbook strategy.yml -f 1
