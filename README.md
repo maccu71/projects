@@ -1,5 +1,6 @@
 **Here are some projects related to my interests, including:**
 <br/>
+
 **1) Kubernetes - examples:**
 - memory-restriction.yml - Explores the concept of resource allocation and memory restriction in K8S
 - cpu-restriction.yml - a manifest that serves as a practical demonstration of CPU restrictions implemented both at the deployment specification and the namespace quota level in Kubernetes
@@ -10,7 +11,9 @@
 
 **2) Ansible - examples:**
 - 'block' directive in Ansible - usage
-- 'Understanding different strategies in Ansible'
+-  Understanding different strategies in Ansible
+- 'run_nnce' directive: Are You Sure It Runs Only Once?
+
 
 **3) Python - examples:**
 - stacje.py - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.
@@ -592,4 +595,92 @@ Conclusion: choosing the appropriate strategy depends on factors such as invento
 
 Additionally, we can specify the default strategy using the ANSIBLE_STRATEGY environmental variable or by configuring it in the ansible.cfg file for all playbooks.
 
+**Run-Once Directive in Ansible: Are You Sure It Runs Only Once?**
 
+In this example, I would like to discuss the run_once directive and demonstrate how its behavior might not correspond to its name. Can you believe it?
+
+By default, tasks in Ansible are like a well-organized party—they're run one at a time on a group of hosts (the default number is 5) before moving to the next task. However, this behavior depends on the applied strategy. Just like party planning, the behavior can be modified using special directives, such as serial.
+
+The run_once directive is used when you need or want to run certain task(s) only once. This can be useful for getting the value of some variable or making changes in a configuration. While some situations can be handled by specifying a host in the inventory, this might not always be sufficient and can introduce inconsistencies. It's like telling one friend to bring chips but ending up with five bags of chips and no dip. Awkward!
+
+This is where the run_once directive swoops in to save the day!
+
+```
+---
+- name: Directive run_once in action
+  hosts: all
+  gather_facts: no
+  #strategy: host_pinned
+  #serial: 1
+  tasks:
+    - name: First task - with run_once
+      shell: 'echo this task is with run_once'
+      run_once: yes
+    - name: Second task - without run_once
+      shell: 'echo this task is without run_once'
+```
+When we run this playbook, we will see the following output:
+
+```
+$ ansible-playbook run_once.yml
+
+PLAY [directive run_once in action] ********************************************
+
+TASK [First task - with run_once] **********************************************
+changed: [192.168.122.203]
+
+TASK [Second task - without run_once] ******************************************
+changed: [192.168.122.203]
+changed: [192.168.122.201]
+
+PLAY RECAP *********************************************************************
+192.168.122.201            : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+192.168.122.203            : ok=2    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+```
+
+The playbook behaves as expected—the first task, thanks to the run_once directive, was executed only once. Bravo, run_once, you did your job!
+
+Keep in mind that we have only two hosts in our inventory. Let's check it out:
+
+```
+$ ansible-inventory --graph 
+@all:
+  |--@ungrouped:
+  |  |--192.168.122.203
+  |  |--192.168.122.201
+```
+Let's spice things up a bit by uncommenting the serial: 1 option. This enforces running all tasks on one host and then all tasks on the next, and so on. We use the serial option to specify how many hosts tasks should be executed on before moving to the next set (in other words, we specify how many hosts are in a batch to be executed simultaneously). Setting serial to 1 enforces that all tasks be executed on one host at a time before moving to the next. It's like making sure one friend finishes their karaoke song before the next friend starts—no chaotic duets here!
+
+We use the serial option when we don't want Ansible tasks to be executed at the same time or when we want to narrow down the number of hosts (e.g., to maintain the application’s functionality in a load-balancing scheme).
+
+```
+$ ansible-playbook run_once.yml 
+
+PLAY [directive run_once in action] ********************************************
+
+TASK [First task - with run_once] **********************************************
+changed: [192.168.122.203]
+
+TASK [Second task - without run_once] ******************************************
+changed: [192.168.122.203]
+
+PLAY [directive run_once in action] ********************************************
+
+TASK [First task - with run_once] **********************************************
+changed: [192.168.122.201]
+
+TASK [Second task - without run_once] ******************************************
+changed: [192.168.122.201]
+
+PLAY RECAP *********************************************************************
+192.168.122.201            : ok=2    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+192.168.122.203            : ok=2    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+```
+
+Interestingly, we get the same output when we uncomment strategy: host_pinned, which enforces tasks to be executed one by one.
+
+How come? Why was the first task labeled with run_once: yes executed on all hosts?
+
+**We must keep in mind that the run_once directive refers to the specified batch of servers, not the entire inventory.** It's like telling a joke to one small group at a party and then realizing you have to repeat it to each new group that joins in.
+
+We also noticed that the run_once directive behaves similarly to the strategy: host_pinned by enforcing running all tasks sequentially on all hosts in the inventory.

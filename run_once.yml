@@ -1,0 +1,14 @@
+---
+- name: directive run_once in action
+  hosts: all
+  gather_facts: no
+  strategy: host_pinned
+  #serial: 1
+  #run_once: yes
+  tasks:
+    - name: first - with run_once
+      shell: 'echo this task is with run_once'
+      run_once: yes
+    - name: second - without run_once
+      shell: 'echo thisk task without run_once'
+
