@@ -10,10 +10,10 @@
 - sonda-readiness-tcp.yml - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers.
 
 **2) Ansible - examples:**
-- 'block' directive in Ansible - usage
+- `block` directive in Ansible - usage
 -  Understanding different strategies in Ansible
-- 'run_once' directive: Are You Sure It Runs Only Once?
-- differences between `strategy: host_pinned` and 'serial:'
+- `run_once` directive: Are You Sure It Runs Only Once?
+- differences between `strategy: host_pinned` and `serial:`
 
 
 **3) Python - examples:**
@@ -339,20 +339,6 @@ This version clarifies the potential use of a ConfigMap with a Bash script for m
 
 <br/><br/> 
 
-**`stacje.py` - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.**
-
- This is a really nice app that you can launch directly from your Linux console. Start the program in your linux console by issuing: 
-`python3 stacje.py` 
-or just 
-`./stacje.py`
-
-<br/><br/> 
-
-**`cwicz.py` - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.**
-![obraz](https://github.com/maccu71/projects/assets/51779238/887d3e3c-b59d-4a1c-bac3-c4e738d7160f)
-
-<br/><br/> 
-
 **6) `cleaner.yml` - kubernetes manifest intended to clean unnecessary resources from kubernetes cluster (use with caution)**
 
 You start deployment by: `kubectl apply -f https://raw.githubusercontent.com/maccu71/projects/master/cleaner.yml`
@@ -424,6 +410,22 @@ pod/sonda-tcp-7bfcd95db-hv87v   1/1     Running   0          9m35s
 ```
 Kick it out by issuing:
 `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/sonda-readiness-tcp.yml`
+
+<br/><br/> 
+
+**`stacje.py` - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.**
+
+ This is a really nice app that you can launch directly from your Linux console. Start the program in your linux console by issuing: 
+`python3 stacje.py` 
+or just 
+`./stacje.py`
+
+<br/><br/> 
+
+**`cwicz.py` - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.**
+![obraz](https://github.com/maccu71/projects/assets/51779238/887d3e3c-b59d-4a1c-bac3-c4e738d7160f)
+
+<br/><br/> 
 
 
 **'block' directive in Ansible - usage:**
