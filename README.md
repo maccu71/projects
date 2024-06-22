@@ -21,8 +21,8 @@
 - stacje.py - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.
 - cwicz.py - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.
 
-I have done everything possible to ensure that the examples collected here work and do not have errors. 
-ANyway, let me know if you spot any error or a room for improvemment here, please. I would be happy to know about it!
+**I have done much to ensure that the examples collected here work and do not have errors. 
+Anyway, let me know if you spot any error or a room for improvemment here, please. I would be happy to know about it!**
 
 <br/><br/> 
 
@@ -435,6 +435,9 @@ Rolling updates in DaemonSets are like substituting players in a soccer match! Y
 Moreover, with the `minReadySeconds` option, you can check if the player on the field is ready to take action before substituting the next one! Fun, right?
 
 So, just like in a soccer game, you ensure that your team (Pods) is always performing at its best, and only make changes when you're sure the new player is ready.Let's start DaemonSet on 3 nodes now!
+
+Having 2+ nodes start the deployment by issuing: https://raw.githubusercontent.com/maccu71/projects/master/ds-update.yml
+
 ```
 $ kubectl get nodes
 NAME         STATUS   ROLES           			AGE    VERSION
@@ -523,18 +526,20 @@ We can see the same dance -
 - the same scheme happens on the next node(s).
 
 RollingUpdate is the default update strategy in DaemonSet that automatically rolls out changes to Pod instances according to a defined strategy.
-When the DaemonSet definition changes (e.g., container image, port changes), Kubernetes automatically initiates the update process. This involves replacing old Pod instances with new ones, ensuring smooth transition without service disruption.
+When the DaemonSet definition changes (e.g., container image, port), Kubernetes automatically initiates the update process. This involves replacing old Pod instances with new ones, ensuring smooth transition without service disruption (we just need to change manifest and apply it).
 
-If we change updateStrategy to OnDelete we are forced to manual deletion and recreation of Pods to apply updates (when DaemonSet definition changes - e.g. container image or port, the update is not automatically applied to existing Pod instances)
-
-Instead, users need to manually delete existing DaemonSet pod (kubectl delete pod ..) or issue - kubectl apply -f file_with_manifest with the new DaemonSet definition.
+If we change updateStrategy to OnDelete we are forced to manual deletion and recreation of Pods after applying changes. The update is not automatically applied to existing Pod instances)
 
 Key Differences:
-Manual or Automatic Update? OnDelete requires user intervention to delete and recreate Pods for updates. RollingUpdate handles this automatically.
-OnDelete can be used for more controlled Pod lifecycle management but increases user management and responsibility. RollingUpdate offers a simpler and more automatic update method.
+Manual or Automatic Update? OnDelete requires user intervention to delete and recreate Pods for updates. RollingUpdate handles this automatically = just change manifest + apply it.
+OnDelete can be used for more controlled Pod lifecycle management but increases user management and responsibility = change manifest + apply it + delete pod. 
 
 Final words:
-The choice of strategy depends on specific application requirements, update policies, and the level of control you want to maintain over the Pod update process in your Kubernetes cluster.
+RollingUpdate offers a simpler and more automatic update method. But the choice of strategy depends on specific app. requirements, update policies, and the level of control you want to maintain over the Pod update process in your Kubernetes cluster. 
+
+Now, we can wind up all by issuing: kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/ds-update.yml 
+
+But, what are those `NOMINATED NODE` and `READINESS GATES` shown on the last output? Let's dive into this topic.
 
 <br/><br/>
 
