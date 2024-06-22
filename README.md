@@ -8,6 +8,7 @@
 - init-containers-usage - a helm package that illustrates the oncept of init-containers in Kubernetes cluster
 - cleaner.yml - kubernetes manifest intended to clean unnecessary resources from kubernetes cluster (use with caution)
 - sonda-readiness-tcp.yml - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers.
+- ds-update.yml - Rolling updates in DaemonSets component in Kubernetes
 
 **2) Ansible - examples:**
 - `block` directive in Ansible - usage
@@ -412,6 +413,130 @@ Kick it out by issuing:
 `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/sonda-readiness-tcp.yml`
 
 <br/><br/> 
+
+**`ds-update.yml` - Rolling updates in DaemonSets component in Kubernetes**
+
+There are two possible update options here - `RollingUpdate` and `OnDelete`.
+But let's recall the basic characteristics of DaemonSets firstly.
+
+On every available node, there is only ONE instance. Nevetheless we can use a node selector to run it on specific nodes by labeling the nodes accordingly. This is often simpler than using node affinity, which requires more configuration.
+One instance, and only ONE instance, per node, capisce?
+Where can we use this setup?
+
+They are particularly useful when you want to run specific services on each node (or specified) in the cluster, like:
+- Log Collection: Running log collection agents such as Fluentd or Logstash on each node to gather logs.
+- Monitoring: Deploying monitoring agents like Prometheus Node Exporter or Datadog Agent to collect metrics from each node.
+- Security: Running security agents that need to monitor and enforce security policies across all nodes.
+
+DaemonSets ensure that certain services are always running on all nodes (or a subset of them) and that new Pods are automatically created when new nodes are added to the cluster. They support rolling updates, allowing you to update the Pods managed by the DaemonSet without downtime.
+
+Rolling updates in DaemonSets are like substituting players in a soccer match! You decide how many players to substitute (or rather how many should stay on the field through `maxUnavailable`), and only when one player leaves the field, another can enter. Isn't that a great analogy?
+
+Moreover, with the `minReadySeconds` option, you can check if the player on the field is ready to take action before substituting the next one! Fun, right?
+
+So, just like in a soccer game, you ensure that your team (Pods) is always performing at its best, and only make changes when you're sure the new player is ready.Let's start DaemonSet on 3 nodes now!
+```
+$ kubectl get nodes
+NAME         STATUS   ROLES           			AGE    VERSION
+node-1       Ready    control-plane,master  10d   v1.28.3
+node-2   		 Ready    <none>          			10d   v1.28.3
+node-3   		 Ready    <none>          			9d 	  v1.28.3
+```
+```
+$ cat ds-update.yml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: as
+  name: as
+spec:
+  selector:
+    matchLabels:
+      app: as
+  updateStrategy:
+    type: RollingUpdate  ## other option - OnDelete
+    rollingUpdate:
+      maxUnavailable: 1  ## speaks for itself
+  minReadySeconds: 20    ## wait 20 sec to be sure the pod works well
+  template:
+    metadata:
+      labels:
+        app: as
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+          - containerPort: 80
+```
+Let's change containerPort to some other, let's say 8080 forcing kubernetes to rollout and see what happens..
+```
+$ kubectl get ds --watch
+NAME   DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+as     3         3         3       3            3           <none>          81m
+as     3         3         3       3            3           <none>          82m
+as     3         3         3       0            3           <none>          82m
+as     3         3         2       1            2           <none>          83m
+as     3         3         3       1            2           <none>          83m
+as     3         3         3       1            3           <none>          83m
+as     3         3         2       2            2           <none>          83m
+as     3         3         3       2            2           <none>          83m
+as     3         3         3       2            3           <none>          83m
+as     3         3         2       3            2           <none>          84m
+as     3         3         3       3            2           <none>          84m
+as     3         3         3       3            3           <none>          84m
+```
+We can see that there is at least 2 nodes avaliable and ready - according to  'maxUnavailable: 1' option.
+```
+$ kubectl get pod --watch -o wide
+NAME       READY   STATUS    					 RESTARTS   AGE   IP           NODE     NOMINATED NODE   READINESS GATES
+as-dqpsr   1/1     Running   					 0          77m   10.244.0.4   node-1   <none>           <none>
+as-fdttt   1/1     Running   					 0          77m   10.244.2.3   node-3   <none>           <none>
+as-gz9pl   1/1     Running   					 0          76m   10.244.1.3   node-2   <none>           <none>
+as-fdttt   1/1     Terminating   			 0          77m   10.244.2.3   node-3   <none>           <none>
+as-fdttt   0/1     Terminating   			 0          78m   <none>       node-3   <none>           <none>
+as-8hd2q   0/1     Pending       			 0          0s    <none>       <none>   <none>           <none>
+as-8hd2q   0/1     Pending       			 0          0s    <none>       node-3   <none>           <none>
+as-8hd2q   0/1     ContainerCreating   0          0s    <none>       node-3   <none>           <none>
+as-8hd2q   1/1     Running             0          1s    10.244.2.4   node-3   <none>           <none>
+as-fdttt   0/1     Terminating         0          78m   <none>       node-3   <none>           <none>
+as-dqpsr   1/1     Terminating         0          79m   10.244.0.4   node-1   <none>           <none>
+as-dqpsr   0/1     Terminating         0          79m   <none>       node-1   <none>           <none>
+as-qxqx5   0/1     Pending             0          0s    <none>       <none>   <none>           <none>
+as-qxqx5   0/1     Pending             0          0s    <none>       node-1   <none>           <none>
+as-qxqx5   0/1     ContainerCreating   0          0s    <none>       node-1   <none>           <none>
+as-dqpsr   0/1     Terminating         0          79m   10.244.0.4   node-1   <none>           <none>
+as-qxqx5   1/1     Running             0          1s    10.244.0.5   node-1   <none>           <none>
+as-gz9pl   1/1     Terminating         0          78m   10.244.1.3   node-2   <none>           <none>
+as-gz9pl   0/1     Terminating         0          78m   <none>       node-2   <none>           <none>
+as-92cbk   0/1     Pending             0          0s    <none>       <none>   <none>           <none>
+as-92cbk   0/1     Pending             0          0s    <none>       node-2   <none>           <none>
+as-92cbk   0/1     ContainerCreating   0          0s    <none>       node-2   <none>           <none>
+as-gz9pl   0/1     Terminating         0          78m   10.244.1.3   node-2   <none>           <none>
+as-92cbk   1/1     Running             0          1s    10.244.1.4   node-2   <none>           <none>
+```
+
+We can see the same dance -
+- a pod is terminating,
+- a next one (or more according to maxUnavailable option) is (are) creating on the same node and the systems checks its (their) functionality (minReadySeconds: 20)
+- the same scheme happens on the next node(s).
+
+RollingUpdate is the default update strategy in DaemonSet that automatically rolls out changes to Pod instances according to a defined strategy.
+When the DaemonSet definition changes (e.g., container image, port changes), Kubernetes automatically initiates the update process. This involves replacing old Pod instances with new ones, ensuring smooth transition without service disruption.
+
+If we change updateStrategy to OnDelete we are forced to manual deletion and recreation of Pods to apply updates (when DaemonSet definition changes - e.g. container image or port, the update is not automatically applied to existing Pod instances)
+
+Instead, users need to manually delete existing DaemonSet pod (kubectl delete pod ..) or issue - kubectl apply -f file_with_manifest with the new DaemonSet definition.
+
+Key Differences:
+Manual or Automatic Update? OnDelete requires user intervention to delete and recreate Pods for updates. RollingUpdate handles this automatically.
+OnDelete can be used for more controlled Pod lifecycle management but increases user management and responsibility. RollingUpdate offers a simpler and more automatic update method.
+
+Final words:
+The choice of strategy depends on specific application requirements, update policies, and the level of control you want to maintain over the Pod update process in your Kubernetes cluster.
+
+<br/><br/>
 
 **`stacje.py` - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.**
 
