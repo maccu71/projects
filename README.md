@@ -8,7 +8,8 @@
 - init-containers-usage - a helm package that illustrates the oncept of init-containers in Kubernetes cluster
 - cleaner.yml - kubernetes manifest intended to clean unnecessary resources from kubernetes cluster (use with caution)
 - sonda-readiness-tcp.yml - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers.
-- ds-update.yml - Rolling updates in DaemonSets component in Kubernetes
+- `ds-update.yml` - Rolling updates in DaemonSet component in Kubernetes
+- `rollout-statefulset.yml` - Diving into StatefulSet update different strategies and its complexities
 
 **2) Ansible - examples:**
 - `block` directive in Ansible - usage
@@ -536,9 +537,9 @@ as-92cbk   1/1     Running             0          1s    10.244.1.4   node-2   <n
 ```
 
 We can see the same dance -
-- pod(s) is/are terminating,
-- a next one (or more according to maxUnavailable option) is (are) creating and the systems checks its (their) functionality (minReadySeconds: 20)
-- the same scheme happens on the next node(s).
+- pod is terminating,
+- a next one (or more according to maxUnavailable option) is creating and the systems checks its functionality (minReadySeconds: 20)
+- the same scheme happens on the next node.
 
 RollingUpdate is the default update strategy in DaemonSet that automatically rolls out changes to Pod instances according to a defined strategy.
 When the DaemonSet definition changes (e.g., container image, port), Kubernetes automatically initiates the update process. This involves replacing old Pod instances with new ones, ensuring smooth transition without service disruption (we just need to change manifest and apply it).
@@ -559,7 +560,72 @@ But, what are those `NOMINATED NODE` and `READINESS GATES` shown on the last out
 
 <br/><br/>
 
-**Available options for Rolling updates in StatefulSets and its consequences**
+**Diving into StatefulSet update different strategies and its complexities**
+
+`StatefulSet` is a Kubernetes component used in stateful applications like databases and anywhere we need to ensure the persistence of data as well as consistent network addressing. It is designed to manage the deployment and scaling of a set of Pods, and provides guarantees about the ordering and uniqueness of these Pods.
+
+StatefulSets are used in situations where each pod needs a unique, stable network identifier.
+
+Persistent storage is required, where each pod must retain its state during its life - across rescheduling and restarts.
+Ordered, graceful deployment, scaling, and updates are necessary.
+
+Pods in StatefulSets have predictable names consisting of a base name and sequential numbers starting from 0, which is the most important pod. Each new pod gets the next number in the sequence. For example, if the base name is web, the pods will be named web-0, web-1, web-2, and so on.
+
+Each pod in a StatefulSet can be associated with its own persistent storage using PersistentVolumeClaims (PVCs). These PVCs ensure that even if a pod is rescheduled to a different node, it can still access its persistent data. This feature is crucial for applications like databases, where data consistency and persistence are the most important.
+
+We use headless services with StatefulSets to get predictable and unchanging DNS names for each pod so that we can access them by name. This allows other applications to interact with each pod directly via its stable network identity.
+
+We have 4 replicas of our StatefulSet ,the pods will have DNS names like:
+```
+state-0.state.default.svc.cluster.local
+state-1.state.default.svc.cluster.local
+state-2.state.default.svc.cluster.local
+state-3.state.default.svc.cluster.local
+```
+If you want to check it, by using eg. `nslookup` command.
+
+StatefulSets offer the following update strategies:
+- `Rolling Update` (Default). In this strategy, the system updates the pods in a sequential order, starting from the last pod (with the highest number) and going down until it finishes with the first pod, number 0. This ensures minimal disruption and allows for careful control over the update process. For example for a StatefulSet with 5 pods (0-4), the update will start with pod-4, then pod-3, and so on, until pod-0.
+```
+updateStrategy:
+  type: RollingUpdate
+```
+
+- `Partitioned Rolling Update`. The partition option as a strategy allows us to update only specific pods, leaving some pods with the old configuration. This is useful for controlled rollouts or canary deployments. When a partition value is set, only the pods with a number greater than or equal to the partition value will be updated. For example, if partition: 3 is set, only pods web-3, web-4, and so on will be updated, while web-0 to web-2 remain unchanged.
+```
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    partition: 2
+```
+- `OnDelete Update` - update strategy offers a high degree of control, making it ideal for scenarios where stability and precision are critical. While it requires more manual effort compared to automated strategies, its benefits in specific situations.
+You delete first Pod manually `kubectl delete pod state-0` and wait unless the Kubernetes deploys a new one in place of the old one. Then you repeat the same process on the next and next Pod until the last one.
+```
+updateStrategy:
+  type: OnDelete
+```
+
+Now, let's focus on 'partition' style of update and change the manifest by uncommenting two lines from `rollout-stateful-set.yml`:  `rollingUpdate:` and `partition: 2`, changing the image to `nginx:latest` and finally applying changes by issuing `kubectl apply -f rollout-stateful-set.yml`. By doing this we force Kubernetes to update only pods: as-2 and as-3. After a while we can see the result:
+```
+$ kubectl get pods -o=custom-columns=NAME:metadata.name,IMAGE:spec.containers[0].image,START_TIME:status.startTime
+NAME                  IMAGE                    START_TIME
+dd-6d7594d974-t9vlw   macosmi/nginxshowip:v1   2024-06-23T18:58:54Z
+state-0               nginx:1.14.2             2024-06-23T18:57:47Z
+state-1               nginx:1.14.2             2024-06-23T18:57:50Z
+state-2               nginx:latest             2024-06-23T19:07:15Z <== different image applied
+state-3               nginx:latest             2024-06-23T19:07:13Z <== different image applied
+```
+```
+$ kubectl get pod
+NAME                  READY   STATUS    RESTARTS   AGE
+state-0               1/1     Running   0          16m
+state-1               1/1     Running   0          16m
+state-2               1/1     Running   0          6m52s
+state-3               1/1     Running   0          6m54s
+```
+These strategies can be combined with `minReadySeconds`, which ensures that after a pod is updated, it must be in a ready state for a specified number of seconds before proceeding to update the next pod. This adds an additional layer of stability to the rolling update process.
+
+StatefulSets update strategies, including `rolling updates` and `partitioned updates`, offer flexibility and control over the update process, making them ideal for managing stateful applications in Kubernetes.
 
 <br/><br/>
 
