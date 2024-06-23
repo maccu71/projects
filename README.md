@@ -421,6 +421,7 @@ But let's recall the basic characteristics of DaemonSets firstly.
 
 On every available node, there is only ONE instance. Nevetheless we can use a node selector to run it on specific nodes by labeling the nodes accordingly. This is often simpler than using node affinity, which requires more configuration.
 One instance, and only ONE instance, per node, capisce?
+
 Where can we use this setup?
 
 They are particularly useful when you want to run specific services on each node (or specified) in the cluster, like:
@@ -430,10 +431,24 @@ They are particularly useful when you want to run specific services on each node
 
 DaemonSets ensure that certain services are always running on all nodes (or a subset of them) and that new Pods are automatically created when new nodes are added to the cluster. They support rolling updates, allowing you to update the Pods managed by the DaemonSet without downtime.
 
-Rolling updates in DaemonSets are like substituting players in a soccer match! You decide how many players to substitute (or rather how many should stay on the field through `maxUnavailable`), and only when one player leaves the field, another can enter. Isn't that a great analogy?
+`Rolling updates` in DaemonSets are like substituting players in a soccer match! You decide how many players to substitute (or rather how many should stay on the field through `maxUnavailable`), and only when one player leaves the field, another can enter. Isn't that a great analogy?
 
 Moreover, with the `minReadySeconds` option, you can check if the player on the field is ready to take action before substituting the next one! Fun, right?
 
+```
+spec:
+  minReadySeconds: 10
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+```
+```
+spec:
+  minReadySeconds: 10
+  updateStrategy:
+    type: OnDelete
+```
 So, just like in a soccer game, you ensure that your team (Pods) is always performing at its best, and only make changes when you're sure the new player is ready.Let's start DaemonSet on 3 nodes now!
 
 Having 2+ nodes start the deployment by issuing: https://raw.githubusercontent.com/maccu71/projects/master/ds-update.yml
@@ -461,7 +476,7 @@ spec:
     type: RollingUpdate  ## other option - OnDelete
     rollingUpdate:
       maxUnavailable: 1  ## speaks for itself
-  minReadySeconds: 20    ## wait 20 sec to be sure the pod works well
+  minReadySeconds: 20    ## optional; wait 20 sec to be sure the pod works well
   template:
     metadata:
       labels:
@@ -521,25 +536,30 @@ as-92cbk   1/1     Running             0          1s    10.244.1.4   node-2   <n
 ```
 
 We can see the same dance -
-- a pod is terminating,
-- a next one (or more according to maxUnavailable option) is (are) creating on the same node and the systems checks its (their) functionality (minReadySeconds: 20)
+- pod(s) is/are terminating,
+- a next one (or more according to maxUnavailable option) is (are) creating and the systems checks its (their) functionality (minReadySeconds: 20)
 - the same scheme happens on the next node(s).
 
 RollingUpdate is the default update strategy in DaemonSet that automatically rolls out changes to Pod instances according to a defined strategy.
 When the DaemonSet definition changes (e.g., container image, port), Kubernetes automatically initiates the update process. This involves replacing old Pod instances with new ones, ensuring smooth transition without service disruption (we just need to change manifest and apply it).
 
-If we change updateStrategy to OnDelete we are forced to manual deletion and recreation of Pods after applying changes. The update is not automatically applied to existing Pod instances)
+If we change 'updateStrategy' to 'OnDelete' we are forced to manual deletion and recreation of Pods after applying changes. The update is not automatically applied to existing Pod instances)
 
-Key Differences:
-Manual or Automatic Update? OnDelete requires user intervention to delete and recreate Pods for updates. RollingUpdate handles this automatically = just change manifest + apply it.
+What is the difference between them or Manual or Automatic Update? OnDelete requires user intervention to delete and recreate Pods for updates. RollingUpdate handles this automatically = just change manifest + apply it.
 OnDelete can be used for more controlled Pod lifecycle management but increases user management and responsibility = change manifest + apply it + delete pod. 
 
 Final words:
 RollingUpdate offers a simpler and more automatic update method. But the choice of strategy depends on specific app. requirements, update policies, and the level of control you want to maintain over the Pod update process in your Kubernetes cluster. 
 
-Now, we can wind up all by issuing: kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/ds-update.yml 
+We can wind up all by issuing: `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/ds-update.yml` 
+
+Now, a bit about rolling update in StatefulSets, it will be fun!
 
 But, what are those `NOMINATED NODE` and `READINESS GATES` shown on the last output? Let's dive into this topic.
+
+<br/><br/>
+
+**Available options for Rolling updates in StatefulSets and its consequences**
 
 <br/><br/>
 
