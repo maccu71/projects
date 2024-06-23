@@ -8,7 +8,7 @@
 - init-containers-usage - a helm package that illustrates the oncept of init-containers in Kubernetes cluster
 - cleaner.yml - kubernetes manifest intended to clean unnecessary resources from kubernetes cluster (use with caution)
 - sonda-readiness-tcp.yml - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers.
-- `ds-update.yml` - Rolling updates in DaemonSet component in Kubernetes
+- `rollout-daemonset` - Rolling updates in DaemonSet component in Kubernetes
 - `rollout-statefulset.yml` - Diving into StatefulSet update different strategies and its complexities
 
 **2) Ansible - examples:**
@@ -415,7 +415,7 @@ Kick it out by issuing:
 
 <br/><br/> 
 
-**`ds-update.yml` - Rolling updates in DaemonSets component in Kubernetes**
+**`rollout-daemonset` - Rolling updates in DaemonSets component in Kubernetes**
 
 There are two possible update options here - `RollingUpdate` and `OnDelete`.
 But let's recall the basic characteristics of DaemonSets firstly.
@@ -452,7 +452,7 @@ spec:
 ```
 So, just like in a soccer game, you ensure that your team (Pods) is always performing at its best, and only make changes when you're sure the new player is ready.Let's start DaemonSet on 3 nodes now!
 
-Having 2+ nodes start the deployment by issuing: https://raw.githubusercontent.com/maccu71/projects/master/ds-update.yml
+Having 2+ nodes start the deployment by issuing: https://raw.githubusercontent.com/maccu71/projects/master/rollout-daemonset
 
 ```
 $ kubectl get nodes
@@ -462,7 +462,7 @@ node-2   		 Ready    <none>          			10d   v1.28.3
 node-3   		 Ready    <none>          			9d 	  v1.28.3
 ```
 ```
-$ cat ds-update.yml
+$ cat rollout-daemonset
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -552,7 +552,7 @@ OnDelete can be used for more controlled Pod lifecycle management but increases 
 Final words:
 RollingUpdate offers a simpler and more automatic update method. But the choice of strategy depends on specific app. requirements, update policies, and the level of control you want to maintain over the Pod update process in your Kubernetes cluster. 
 
-We can wind up all by issuing: `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/ds-update.yml` 
+We can wind up all by issuing: `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/rollout-daemonset` 
 
 Now, a bit about rolling update in StatefulSets, it will be fun!
 
