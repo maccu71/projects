@@ -628,15 +628,6 @@ These strategies can be combined with `minReadySeconds`, which ensures that afte
 
 StatefulSets update strategies, including `rolling updates` and `partitioned updates`, offer flexibility and control over the update process, making them ideal for managing stateful applications in Kubernetes.
 
-<br/><br/>
-
-**`stacje.py` - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.**
-
- This is a really nice app that you can launch directly from your Linux console. Start the program in your linux console by issuing: 
-`python3 stacje.py` 
-or just 
-`./stacje.py`
-
 <br/><br/> 
 **allowing and bloking access via network policies in Kubernetes**
 
@@ -658,6 +649,7 @@ spec:
           ver: two
     ports:
     - port: 80
+```
 ```
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -718,6 +710,15 @@ Spec:
   Not affecting egress traffic
   Policy Types: Ingress
 ```
+<br/><br/>
+
+**`stacje.py` - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.**
+
+ This is a really nice app that you can launch directly from your Linux console. Start the program in your linux console by issuing: 
+`python3 stacje.py` 
+or just 
+`./stacje.py````
+
 <br/><br/>
 
 **`cwicz.py` - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.**
