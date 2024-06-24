@@ -1,26 +1,50 @@
-apiVersion: apps/v1
-kind: DaemonSet
+---
+apiVersion: v1
+kind: Service
 metadata:
+  name: headless
   labels:
-    app: as
-  name: as
+    app: my-app
 spec:
+  clusterIP: None
+  selector:
+    app: my-app
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: state
+spec:
+  replicas: 4
   selector:
     matchLabels:
-      app: as
-  updateStrategy:
-    type: RollingUpdate  ## OnDelete
-    rollingUpdate:
-      maxUnavailable: 1
-  minReadySeconds: 20
+      app: my-app
+  serviceName: headless
   template:
     metadata:
       labels:
-        app: as
+        app: my-app
     spec:
       containers:
-      - name: nginx
-        image: macosmi/nginxshowip:v1
-        ports:
-          - containerPort: 80
+      - name: web
+        image: nginx:1.14.2 ## nginx:latest
+        volumeMounts:
+        - name: my-storage
+          mountPath: /data
+  updateStrategy:
+    type: RollingUpdate
+    #rollingUpdate:
+      #partition: 2
+  volumeClaimTemplates:
+  - metadata:
+      name: my-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 50Mi
 

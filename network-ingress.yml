@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: 
+  name: restrict
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      ver: three
+  ingress:
+  - from: 
+    - podSelector:
+        matchLabels:
+          ver: two
+    ports:
+    - port: 80
+

@@ -8,8 +8,9 @@
 - init-containers-usage - a helm package that illustrates the oncept of init-containers in Kubernetes cluster
 - cleaner.yml - kubernetes manifest intended to clean unnecessary resources from kubernetes cluster (use with caution)
 - sonda-readiness-tcp.yml - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers.
-- `rollout-daemonset` - Rolling updates in DaemonSet component in Kubernetes
+- `rollout-daemonset.yml` - Rolling updates in DaemonSet component in Kubernetes
 - `rollout-statefulset.yml` - Diving into StatefulSet update different strategies and its complexities
+- allowing and bloking access by network policies in Kubernetes
 
 **2) Ansible - examples:**
 - `block` directive in Ansible - usage
@@ -415,7 +416,7 @@ Kick it out by issuing:
 
 <br/><br/> 
 
-**`rollout-daemonset` - Rolling updates in DaemonSets component in Kubernetes**
+**`rollout-daemonset.yml` - Rolling updates in DaemonSets component in Kubernetes**
 
 There are two possible update options here - `RollingUpdate` and `OnDelete`.
 But let's recall the basic characteristics of DaemonSets firstly.
@@ -452,7 +453,7 @@ spec:
 ```
 So, just like in a soccer game, you ensure that your team (Pods) is always performing at its best, and only make changes when you're sure the new player is ready.Let's start DaemonSet on 3 nodes now!
 
-Having 2+ nodes start the deployment by issuing: https://raw.githubusercontent.com/maccu71/projects/master/rollout-daemonset
+Having 2+ nodes start the deployment by issuing: https://raw.githubusercontent.com/maccu71/projects/master/rollout-daemonset.yml
 
 ```
 $ kubectl get nodes
@@ -462,7 +463,7 @@ node-2   		 Ready    <none>          			10d   v1.28.3
 node-3   		 Ready    <none>          			9d 	  v1.28.3
 ```
 ```
-$ cat rollout-daemonset
+$ cat rollout-daemonset.yml
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -552,7 +553,7 @@ OnDelete can be used for more controlled Pod lifecycle management but increases 
 Final words:
 RollingUpdate offers a simpler and more automatic update method. But the choice of strategy depends on specific app. requirements, update policies, and the level of control you want to maintain over the Pod update process in your Kubernetes cluster. 
 
-We can wind up all by issuing: `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/rollout-daemonset` 
+We can wind up all by issuing: `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/rollout-daemonset.yml` 
 
 Now, a bit about rolling update in StatefulSets, it will be fun!
 
@@ -637,6 +638,87 @@ or just
 `./stacje.py`
 
 <br/><br/> 
+**allowing and bloking access via network policies in Kubernetes**
+
+`Ingress policy`:
+```
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: 
+  name: restrict
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      ver: three
+  ingress:
+  - from: 
+    - podSelector:
+        matchLabels:
+          ver: two
+    ports:
+    - port: 80
+```
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egress-1
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      ver: two
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          ver: three
+    ports:
+    - port: 81
+      protocol: TCP
+    - port: 443
+      protocol: TCP
+  policyTypes:
+  - Egress
+```
+```
+$ kubectl describe networkpolicy egress-1 
+Name:         egress-1
+Namespace:    default
+Created on:   2024-06-24 20:47:03 +0200 CEST
+Labels:       <none>
+Annotations:  <none>
+Spec:
+  PodSelector:     ver=two
+  Not affecting ingress traffic
+  Allowing egress traffic:
+    To Port: 81/TCP
+    To Port: 443/TCP
+    To:
+      PodSelector: ver=three
+  Policy Types: Egress
+```
+```
+$ kubectl get networkpolicy -n default
+NAME       POD-SELECTOR   AGE
+egress-1   ver=three      11s
+```
+```
+Name:         restrict
+Namespace:    default
+Created on:   2024-06-24 21:08:43 +0200 CEST
+Labels:       <none>
+Annotations:  <none>
+Spec:
+  PodSelector:     ver=three
+  Allowing ingress traffic:
+    To Port: 80/TCP
+    From:
+      PodSelector: ver=two
+  Not affecting egress traffic
+  Policy Types: Ingress
+```
+<br/><br/>
 
 **`cwicz.py` - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.**
 ![obraz](https://github.com/maccu71/projects/assets/51779238/887d3e3c-b59d-4a1c-bac3-c4e738d7160f)

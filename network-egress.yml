@@ -1,0 +1,22 @@
+ cat network-egress.yml 
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: block-egress-specific
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      ver: two   ## where apply egress? 
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          ver: three  ## what allow?
+    ports:
+    - port: 81
+      protocol: TCP
+    - port: 443
+      protocol: TCP
+  policyTypes:
+  - Egress

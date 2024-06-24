@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: as
+  name: as
+spec:
+  selector:
+    matchLabels:
+      app: as
+  updateStrategy:
+    type: RollingUpdate  ## OnDelete
+    rollingUpdate:
+      maxUnavailable: 1
+  minReadySeconds: 20
+  template:
+    metadata:
+      labels:
+        app: as
+    spec:
+      containers:
+      - name: nginx
+        image: macosmi/nginxshowip:v1
+        ports:
+          - containerPort: 80
+
