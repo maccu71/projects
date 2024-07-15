@@ -710,6 +710,16 @@ Spec:
   Not affecting egress traffic
   Policy Types: Ingress
 ```
+```
+  ingress:
+  - from: 
+    - podSelector:
+        matchLabels:
+          ver: two
+    - podSelector:
+        matchLabels:
+          run: one
+```
 <br/><br/>
 
 **`stacje.py` - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.**
