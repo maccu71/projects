@@ -1,11 +1,9 @@
 '''
 This is an app to visualize my running results as well as store them.
 '''
-
 from datetime import date
 import json
 import matplotlib.pyplot as plt
-
 
 First_Day = date(2023, 1, 11)   # day when you started makeing exercises
 Today = date.today()            # obvious, today
@@ -18,7 +16,7 @@ print(f'\nDays after you started: {Days}')
 
 czas = 60 * minuty + sekundy  # conversion minutes and sesonds to total seconds
 
-with open("cwicz.dump", "r") as fs:
+with open("cwicz.dump", "r", encoding='utf-8') as fs:
     druga = json.load(fs)
 
 lista = []
@@ -32,7 +30,6 @@ wspolczynnik = 100 / (lista_max - lista_min)
 Wynik = round(wspolczynnik * (lista_max - czas))
 
 print(f'Your result: {Wynik:.1f} % \n')
-
 
 better, worst = 0, 0
 for i in druga.values():
@@ -48,7 +45,6 @@ else:
     print(f'Number of worst  runs:({worst}) ',end='')
     print('\u25A0'*worst)
 
-
 data = {}  # dict with % results (as comparison to max)
 
 for i in druga:
@@ -61,7 +57,7 @@ odp = input("save the output? y/n ")
 print()
 if odp.lower() == "y":
     druga[str(Days)] = czas
-    with open("cwicz.dump", "w") as file:
+    with open("cwicz.dump", "w", encoding='utf-8') as file:
         json.dump(druga, file)
 
 # show results in a list form
