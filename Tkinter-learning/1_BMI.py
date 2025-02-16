@@ -3,32 +3,36 @@ import tkinter as tk
 class App:
     def __init__(self, window):
         '''
-        program do obliczania BMI wykorzystujący
-        tkinter framework
+        prosty GUI program do obliczania BMI 
+        wykorzystujący tkinter framework
         '''
         self.window = window
         self.window.title("BMI kalkulator")
-
-        self.label1 = tk.Label(self.window, text='Podaj wagę w kg')
-        self.label1.pack()
+        # self.window.overrideredirect(True) 
+    
+ 
+        self.label1 = tk.Label(self.window, text='Podaj wagę w kg',padx=5, pady=5)
+        self.label1.grid(row=0,column=0 ,sticky='W')
 
         self.entry1 = tk.Entry(self.window)
-        self.entry1.pack()
+        self.entry1.grid(row=0,column=1)
 
-        self.label2 = tk.Label(self.window, text='Podaj wzrost w cm')
-        self.label2.pack()
+        self.label2 = tk.Label(self.window, text='Podaj wzrost w cm',padx=5, pady=5)
+        self.label2.grid(row=1,column=0, sticky='W')
 
         self.entry2 = tk.Entry(self.window)
-        self.entry2.pack()
+        self.entry2.grid(row=1,column=1, padx=8, pady=10)
 
-        self.wynik = tk.Label(self.window, text="Your BMI will appear here.")
-        self.wynik.pack()
+        self.wynik = tk.Label(self.window, 
+            text="Twoje BMI",
+            font=('Arial', 10, 'bold'))
+        self.wynik.grid(row=2,column=0,padx=2, pady=5, sticky='W')
 
-        self.close = tk.Button(self.window, text='Tutaj zamknij aplikację', command=self.close_app)
-        self.close.pack()
+        self.close = tk.Button(self.window, text='Tutaj zamknij', padx=40, pady=5, command=self.close_app)
+        self.close.grid(row=3,column=0, padx=4, pady=6)
 
-        self.oblicz = tk.Button(self.window,text='Oblicz swoje BMI',command=self.oblicz_bmi)
-        self.oblicz.pack()
+        self.oblicz = tk.Button(self.window,text='Oblicz BMI',padx=40, pady=5, command=self.oblicz_bmi)
+        self.oblicz.grid(row=3,column=1, padx=4, pady=6)
 
     def close_app(self) -> None:
         '''
@@ -54,5 +58,3 @@ window = tk.Tk()
 app = App(window)
 
 window.mainloop()
-
-
