@@ -2,7 +2,7 @@
 <br/>
 
 **1) Kubernetes - examples:**
-- memory-restriction.yml - Explores the concept of resource allocation and memory restriction in K8S
+- install_kubernetes.yml - Ansible playbook intended to automate installation of a Kubernetes cluster on a Ubuntu24 KVM VMs- memory-restriction.yml - Explores the concept of resource allocation and memory restriction in K8S
 - cpu-restriction.yml - a manifest that serves as a practical demonstration of CPU restrictions implemented both at the deployment specification and the namespace quota level in Kubernetes
 - diving into the particularies of Quality of Service - QoS 
 - init-containers-usage - a helm package that illustrates the oncept of init-containers in Kubernetes cluster
@@ -17,6 +17,7 @@
 -  Understanding different strategies in Ansible
 - `run_once` directive: Are You Sure It Runs Only Once?
 - differences between `strategy: host_pinned` and `serial:`
+- install_kubernetes.yml - Ansible playbook intended to automate installation of a Kubernetes cluster on a Ubuntu24 KVM VMs
 
 
 **3) Python - examples:**
@@ -736,6 +737,57 @@ or just
 
 <br/><br/> 
 
+**Ansible playbook intended to automate installation of a Kubernetes cluster on a Ubuntu24 KVM VMs**
+
+I know it isn't some kind of.. rocket science but.. a good way to review some Ansible modules along the way..
+
+Prerequisites: (all of this you can automate as well)
+- Ubuntu 24.04.2 LTS minimal server (at least 3) with set hostnames deployed with KVM
+  You may get it from: https://ubuntu.com/download/server
+- ssh keys already uploaded eg. `ssh-keygen -t ed25519 -f ~/.ssh/ansible_ed25519` with `ssh-copy-id ansible_user@your_vm` on all
+- installed chrony time service - needed for smoothly API. apt-cache, etc. eg. `sudo apt install chrony -y && systemctl enable chrony --now`
+- set Ansible inventory eg. 
+
+```
+ansible-inventory --graph
+@all:
+  |--@ungrouped:
+  |--@workers:
+  |  |--worker1
+  |  |--worker2
+  |--@master:
+  |  |--master1
+```
+for example:
+```
+tail -n 14 /etc/ansible/hosts
+[all]
+
+[workers]
+worker1 ansible_host=192.168.122.174 ansible_user=maco
+worker2 ansible_host=192.168.122.199 ansible_user=maco
+
+[master]
+master1 ansible_host=192.168.122.183 ansible_user=maco
+
+[workers:vars]
+ansible_python_interpreter=/usr/bin/python3
+
+[master:vars]
+ansible_python_interpreter=/usr/bin/python3
+```
+
+hint: it is good to make snapshots of your machines on KVM so you can revert to them in case of failure, 
+eg. `for i in $(echo kworker1 kworker2 kmaster); do virsh snapshot-revert $i name_of_snapshot; done`
+
+Then:
+```
+ansible -i hosts install-kubernetes-cluster.yml
+```
+I'd like to add that I saw and got a bash procedure from https://medium.com/@subhampradhan966/kubeadm-setup-for-ubuntu-24-04-lts-f6a5fc67f0df and only 'translated' it from bash to Ansible or 'automated' it.
+It was refreshing to review Ansible modules along the way. 
+
+<br/><br/>
 
 **'block' directive in Ansible - usage:**
 

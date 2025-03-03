@@ -1,0 +1,244 @@
+---
+- name: Install Kubernetes cluster
+  hosts: all
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: Restart chronyd service
+      ansible.builtin.systemd:
+        name: chronyd
+        state: restarted
+
+    - name: Force immediate time sync
+      ansible.builtin.command: chronyc makestep
+
+    - name: Wait 10 seconds for time to stabilize
+      ansible.builtin.pause:
+        seconds: 10
+
+    - name: Verify time is correct
+      ansible.builtin.command: date
+      register: current_time
+
+    - name: Show synchronized time
+      ansible.builtin.debug:
+        msg: "Current time on {{ inventory_hostname }}: {{ current_time.stdout }}"
+  
+    - name: Update system with 1 hour cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        upgrade: dist
+
+    - name: Install initial packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - apt-transport-https
+        - curl
+        - containerd
+
+    - name: Create directory /etc/containerd
+      file:
+        owner: root
+        group: root
+        mode: '0755'
+        path: /etc/containerd
+        state: directory
+
+    - name: Generate default containerd config
+      shell: containerd config default | tee /etc/containerd/config.toml > /dev/null
+
+    - name: Some changes in file
+      replace:
+        path: /etc/containerd/config.toml
+        regexp: 'SystemdCgroup = false'
+        replace: 'SystemdCgroup = true'
+
+    - name: Reload containerd
+      systemd:
+        name: containerd
+        state: restarted
+
+    - name: Ensure that /etc/apt/keyrings exists
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Download Kubernetes repository key
+      get_url:
+        url: https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key
+        dest: /tmp/kubernetes-release.key
+        mode: '0644'
+
+    - name: Convert the key to a format apt can use
+      shell: gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /tmp/kubernetes-release.key
+
+    - name: Add Kubernetes APT repository
+      copy:
+        dest: /etc/apt/sources.list.d/kubernetes.list
+        content: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /"
+        mode: '0644'
+
+    - name: Update apt cache after adding Kubernetes repository
+      apt:
+        update_cache: yes
+
+    - name: Install Kubernetes package
+      apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+
+    - name: Hold certain packages at their current version
+      dpkg_selections:
+        name: "{{ item }}"
+        selection: hold
+      loop:
+        - kubelet
+        - kubeadm
+        - kubectl
+
+    - name: Disable swap as it is not supported by Kubernetes
+      shell: swapoff -a
+
+    - name: Replace all swap possible entries in /etc/fstab
+      lineinfile:
+        path: /etc/fstab
+        regexp: '^.*swap.*$'
+        line: '#&'
+
+    - name: Load overlay and br_netfilter kernel module
+      modprobe:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - overlay
+        - br_netfilter
+
+    - name: Set sysctl parameters for Kubernetes
+      copy:
+        dest: /etc/sysctl.d/k8s.conf
+        content: |
+          net.bridge.bridge-nf-call-iptables  = 1
+          net.bridge.bridge-nf-call-ip6tables = 1
+          net.ipv4.ip_forward                 = 1
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Ensure sysctl parameters are set for Kubernetes
+      lineinfile:
+        path: /etc/sysctl.d/k8s.conf
+        regexp: '^{{ item.key }}'  # This looks for lines that start with the key you want
+        line: "{{ item.key }} = {{ item.value }}"
+        create: yes  # Will create the file if it doesn't exist
+      loop:
+        - { key: "net.bridge.bridge-nf-call-iptables", value: "1" }
+        - { key: "net.bridge.bridge-nf-call-ip6tables", value: "1" }
+        - { key: "net.ipv4.ip_forward", value: "1" }
+
+    - name: Reload sysctl settings
+      shell: sysctl --system
+
+- name: Initialize Kubernetes with Flannel pod network
+  hosts: master
+  become: yes
+  tasks:
+    - name: Initialize Kubernetes with Flannel pod network
+      shell: kubeadm init --pod-network-cidr=10.244.0.0/16
+      register: kubeadm_init_output
+
+    - name: Print the output of kubeadm init
+      debug:
+        var: kubeadm_init_output.stdout
+
+    - name: Generate a new token for worker nodes
+      shell: kubeadm token create --print-join-command
+      register: join_command_output
+
+    - name: Print the join command
+      debug:
+        var: join_command_output.stdout
+
+- name: Join worker nodes to the Kubernetes cluster
+  hosts: workers
+  become: yes
+  tasks:
+    - name: Join worker node to the cluster
+      shell: "{{ hostvars['master1']['join_command_output'].stdout }}"
+
+- name: Join worker nodes to the Kubernetes cluster
+  hosts: all
+  become: yes
+  tasks:
+    - name: Create .kube directory in home
+      file:
+        path: "/home/{{ ansible_user }}/.kube" 
+        state: directory
+        owner: "{{ ansible_user }}"
+        mode: '0755'
+
+    - name: Fetch admin.conf from master node to controller
+      fetch:
+        src: /etc/kubernetes/admin.conf
+        dest: ./admin.conf
+        flat: yes
+      delegate_to: master1 
+
+    - name: Copy admin.conf to .kube/config
+      copy:
+        src: ./admin.conf 
+        dest: "/home/{{ ansible_user }}/.kube/config"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+
+    - name: Set ownership of .kube/config
+      file:
+        path: "/home/{{ ansible_user }}/.kube/config"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        state: file
+        mode: '0644'
+
+    - name: Set KUBECONFIG environment variable
+      shell: |
+        echo "export KUBECONFIG=/home/{{ ansible_user }}/.kube/config" >> ~/.bashrc
+      environment:
+        KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+
+- name: Apply Flannel network plugin (on master)
+  hosts: master
+  become: yes
+  tasks:
+    - name: Download Flannel manifest
+      ansible.builtin.get_url:
+        url: https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+        dest: /tmp/kube-flannel.yml
+        mode: '0644'
+  
+    - name: Apply Kubernetes manifest using kubectl
+      ansible.builtin.command: kubectl apply -f /tmp/kube-flannel.yml
+      environment:
+        KUBECONFIG: /home/{{ ansible_user }}/.kube/config
+  
+  
+- name: Final check and verification
+  hosts: all
+  tasks:
+    - name: Verify the cluster is up and running
+      shell: kubectl get nodes
+      register: kubectl_get_nodes_output  
+      failed_when: kubectl_get_nodes_output.rc != 0
+
+    - name: Display success message
+      debug:
+        msg: "Cluster is up and running, be happy"
+      when: kubectl_get_nodes_output.rc == 0
+
+
