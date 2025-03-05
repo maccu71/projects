@@ -8,7 +8,7 @@ A_cpu = torch.rand((size, size))  # On CPU
 B_cpu = torch.rand((size, size))
 
 start = time.time()
-C_cpu = torch.mm(A_cpu, B_cpu)  # multiplication macierzy na CPU
+C_cpu = torch.mm(A_cpu, B_cpu)  # matrix multiplication
 end = time.time()
 print(f"CPU Time: {end - start:.4f} s")
 

@@ -2,12 +2,13 @@
 <br/>
 
 **1) Kubernetes - examples:**
-- install_kubernetes.yml - Ansible playbook intended to automate installation of a Kubernetes cluster on a Ubuntu24 KVM VMs- memory-restriction.yml - Explores the concept of resource allocation and memory restriction in K8S
-- cpu-restriction.yml - a manifest that serves as a practical demonstration of CPU restrictions implemented both at the deployment specification and the namespace quota level in Kubernetes
+- `install-kubernetes-cluster.yml` - Ansible playbook intended to automate installation of a Kubernetes cluster on a Ubuntu24 KVM VMs
+- `memory-restriction.yml` - Explores the concept of resource allocation and memory restriction in K8S
+- `cpu-restriction.yml` - a manifest that serves as a practical demonstration of CPU restrictions implemented both at the deployment specification and the namespace quota level in Kubernetes
 - diving into the particularies of Quality of Service - QoS 
 - init-containers-usage - a helm package that illustrates the oncept of init-containers in Kubernetes cluster
-- cleaner.yml - kubernetes manifest intended to clean unnecessary resources from kubernetes cluster (use with caution)
-- sonda-readiness-tcp.yml - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers.
+- `cleaner.yml` - kubernetes manifest intended to clean unnecessary resources from kubernetes cluster (use with caution)
+- `sonda-readiness-tcp.yml` - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers.
 - `rollout-daemonset.yml` - Rolling updates in DaemonSet component in Kubernetes
 - `rollout-statefulset.yml` - Diving into StatefulSet update different strategies and its complexities
 - allowing and bloking access by network policies in Kubernetes
@@ -17,15 +18,19 @@
 -  Understanding different strategies in Ansible
 - `run_once` directive: Are You Sure It Runs Only Once?
 - differences between `strategy: host_pinned` and `serial:`
-- install_kubernetes.yml - Ansible playbook intended to automate installation of a Kubernetes cluster on a Ubuntu24 KVM VMs
-
+- `install-kubernetes-cluster.yml` - Ansible playbook intended to automate installation of a Kubernetes cluster on a Ubuntu24 KVM VMs
 
 **3) Python - examples:**
-- stacje.py - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.
-- cwicz.py - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.
+- `stacje.py` - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.
+- `cwicz.py` - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.
+
+**4) Tkinter - examples:**
+- `simple_Tkinter_monitoring.py` - a simple Python app that usues `psutil` module as well as `Tkiter` framework to produce OS stats in real time (every 1 sec but can be adjusted) with a nice GUI.  
+
+- `1_BMI.py` - a simple app that ususes `Tkinter` framework to calculate your BMI
 
 **I have done much to ensure that the examples collected here work and do not have errors. 
-Anyway, let me know if you spot any error or a room for improvemment here, please. I would be happy to know about it!**
+Anyway, let me know if you spot some errors or a room to improvemment.**
 
 <br/><br/> 
 
@@ -1053,3 +1058,6 @@ How come? Why was the first task labeled with 'run_once: yes' executed on all ho
 We also noticed that the 'run_once' directive behaves similarly to the 'strategy: host_pinned' by enforcing running all tasks sequentially but here is lie the cat:
 1) `serial: 1` performes all tasks on exactly one host after antother from the inventory
 2) `strategy: host_pinned` - performes sequential tasks on a batch of 5 hosts by default or the number specified in `fork` directive. Thus: `strategy: host_pinned` and `-f 1` during playbook execution effectively equals: `serial 1`
+
+
+
