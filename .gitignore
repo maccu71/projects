@@ -1,1 +1,80 @@
+# --------------------
+# Python
+# --------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.db
+*.sqlite3
+
+# VS Code & PyCharm settings
+.vscode/
+.idea/
+
+# Virtual Environments
+venv/
+env/
+ENV/
+
+# Python dotenv files (env variables)
+*.env
+.env.*
+
+# --------------------
+# Docker
+# --------------------
+docker-compose.override.yml
+docker-compose*.yml
+Dockerfile.*
+
+# Ignore sensitive docker files (optional)
+*.dockercfg
+.docker/
+
+# --------------------
+# Kubernetes (local configs, secrets)
+# --------------------
+*.kube/
+.kube/
+.kube/config
+*.yaml  # Optional: You can specify only secrets.yaml if you want to keep other manifests
+
+# --------------------
+# Secrets & Certificates
+# --------------------
+secrets.yaml
+*.pem
+*.key
+*.crt
+
+# --------------------
+# Logs & Dumps
+# --------------------
+*.log
+*.out
+*.bak
+*.swp
+*.tmp
+*.pid
+*.gz
+*.zip
+
+# --------------------
+# System files
+# --------------------
+.DS_Store
+Thumbs.db
+
+# --------------------
+# CI/CD
+# --------------------
+.github/
+.gitlab-ci.yml
+
+# --------------------
+# OTHERS
+#
 stations
+

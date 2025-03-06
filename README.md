@@ -25,12 +25,12 @@
 - `cwicz.py` - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.
 
 **4) Tkinter - examples:**
-- `simple_Tkinter_monitoring.py` - a simple Python app that usues `psutil` module as well as `Tkiter` framework to produce OS stats in real time (every 1 sec but can be adjusted) with a nice GUI.  
+- `simple_Tkinter_monitoring.py` - a simple Python app that usues `psutil` module as well as `Tkiter` framework to produce OS stats in real time (every 1 sec but can be adjusted) with a nice GUI. You can gather huge amount stats from your stuff. `psutil` doc is available here: https://psutil.readthedocs.io/en/latest/
 
-- `1_BMI.py` - a simple app that ususes `Tkinter` framework to calculate your BMI
+- `1_BMI.py` - a simple app that ususes `Tkinter` framework to calculate your BMI.
 
 **I have done much to ensure that the examples collected here work and do not have errors. 
-Anyway, let me know if you spot some errors or a room to improvemment.**
+Anyway, let me know if you spot some errors**
 
 <br/><br/> 
 
