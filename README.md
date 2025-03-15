@@ -1062,7 +1062,7 @@ We also noticed that the 'run_once' directive behaves similarly to the 'strategy
 
 **Simple monitoring**
 `simple_Tkinter_monitoring.py`  
-https://github.com/user-attachments/assets/d6ee627b-f225-4d41-8fc8-620ec51dd7e5
+![wideo](https://github.com/user-attachments/assets/d6ee627b-f225-4d41-8fc8-620ec51dd7e5)
 
 
 
