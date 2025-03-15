@@ -25,7 +25,8 @@
 - `cwicz.py` - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.
 
 **4) Tkinter - examples:**
-- `simple_Tkinter_monitoring.py` - a simple Python app that usues `psutil` module as well as `Tkiter` framework to produce OS stats in real time (every 1 sec but can be adjusted) with a nice GUI. You can gather huge amount stats from your stuff. `psutil` doc is available here: https://psutil.readthedocs.io/en/latest/
+- `simple_Tkinter_monitoring.py` - a simple Python app that usues `psutil` module as well as `Tkiter` framework to produce OS stats in real time (every 1 sec but can be adjusted) with a nice GUI.
+  `psutil` module doc is available here: https://psutil.readthedocs.io/en/latest/
 
 - `1_BMI.py` - a simple app that ususes `Tkinter` framework to calculate your BMI.
 
@@ -1058,6 +1059,10 @@ How come? Why was the first task labeled with 'run_once: yes' executed on all ho
 We also noticed that the 'run_once' directive behaves similarly to the 'strategy: host_pinned' by enforcing running all tasks sequentially but here is lie the cat:
 1) `serial: 1` performes all tasks on exactly one host after antother from the inventory
 2) `strategy: host_pinned` - performes sequential tasks on a batch of 5 hosts by default or the number specified in `fork` directive. Thus: `strategy: host_pinned` and `-f 1` during playbook execution effectively equals: `serial 1`
+
+**Simple monitoring**
+`simple_Tkinter_monitoring.py`  
+https://github.com/user-attachments/assets/d6ee627b-f225-4d41-8fc8-620ec51dd7e5
 
 
 
