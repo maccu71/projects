@@ -5,7 +5,7 @@
 - `install-kubernetes-cluster.yml` - Ansible playbook intended to automate installation of a Kubernetes cluster on a Ubuntu24 KVM VMs
 - `memory-restriction.yml` - Explores the concept of resource allocation and memory restriction in K8S
 - `cpu-restriction.yml` - a manifest that serves as a practical demonstration of CPU restrictions implemented both at the deployment specification and the namespace quota level in Kubernetes
-- diving into the particularies of Quality of Service - QoS 
+- diving into the particularies of Quality of Service - QoS
 - init-containers-usage - a helm package that illustrates the oncept of init-containers in Kubernetes cluster
 - `cleaner.yml` - kubernetes manifest intended to clean unnecessary resources from kubernetes cluster (use with caution)
 - `sonda-readiness-tcp.yml` - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers.
@@ -30,17 +30,17 @@
 
 - `1_BMI.py` - a simple app that ususes `Tkinter` framework to calculate your BMI.
 
-**I have done much to ensure that the examples collected here work and do not have errors. 
+**I have done much to ensure that the examples collected here work and do not have errors.
 Anyway, let me know if you spot some errors**
 
-<br/><br/> 
+<br/><br/>
 
 **1) `memory-restriction.yml` - Explores the concept of resource allocation and memory restriction in Kubernetes**
 
-Here, you can find a Kubernetes manifest showcasing the idea of constraining allocated available resources by specifying their limits, in this case, memory. Running containers without specifying limits can lead to issues. 
+Here, you can find a Kubernetes manifest showcasing the idea of constraining allocated available resources by specifying their limits, in this case, memory. Running containers without specifying limits can lead to issues.
 Bugs in applications, failed services, or memory leaks can cause an increase in memory usage, potentially using up all available resources on a Kubernetes node. Thus, the idea of constraining allocated resources.
 
-Start the deployment by issuing: 
+Start the deployment by issuing:
 `kubectl apply -f https://raw.githubusercontent.com/maccu71/projects/master/memory-restriction.yml`
 
 In this example, we deploy a single container and a package that stresses the container's memory. It allocates an additional 20Mi of memory every 30 seconds. To safeguard the resources of our Kubernetes node, we introduce memory restrictions in the container's spec. It looks like this:
@@ -55,7 +55,7 @@ spec:
           memory: 80Mi
 ```
 
-We will increase allocated memory until it reaches the memory limit. 
+We will increase allocated memory until it reaches the memory limit.
 Can you guess what happens in that case?
 ```
 currently: 20M
@@ -91,20 +91,20 @@ memory-699b66468f-mm7qx   0/1     CrashLoopBackOff    2 (12s ago)    4m40s
 memory-699b66468f-mm7qx   1/1     Running             3 (28s ago)    4m56s
 ```
 
-Now, Kubernetes will be restarting the pod due to OOMKilled events when the allocated memory reaches its limit. 
+Now, Kubernetes will be restarting the pod due to OOMKilled events when the allocated memory reaches its limit.
 What happens then with the deployment itself? We can ask.
 
-Your guess is right; Kubernetes will be restarting the pod repeatedly. 
-Surely, Kubernetes employs an exponential backoff mechanism, substantially increasing the time between each failure. 
+Your guess is right; Kubernetes will be restarting the pod repeatedly.
+Surely, Kubernetes employs an exponential backoff mechanism, substantially increasing the time between each failure.
 This helps prevent overwhelming the system with many restarts and unnecessary resource stress.
 
-However, in my opinion, it's not an fully automatic solution, leaving room for improvement for Kubernetes developers. 
+However, in my opinion, it's not an fully automatic solution, leaving room for improvement for Kubernetes developers.
 One can imagine a situation where the default immutable `restartPolicy: Always` can be changed to some value after that Kubernetes ceased to create new Pod instances.
 
 Now you can kick out the deployment by:
 `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/memory-restriction.yml`
 
-<br/><br/> 
+<br/><br/>
 
 **2) `cpu-restriction.yml` - a manifest that serves as a practical demonstration of CPU restrictions implemented both at the deployment specification and the namespace quota level in Kubernetes.**
 
@@ -113,7 +113,7 @@ At the very beginning, let's dive into `the concept of milliCores` in Kubernetes
 Moreover, the use of milliCores offers a more user-friendly representation. For instance, it is much clearer to express resource usage as 50 milliCores rather than 0.05 cores. This not only enhances clarity but also makes resource management more intuitive and visually appealing.
 
 You start deployment by: `kubectl apply -f https://raw.githubusercontent.com/maccu71/projects/master/cpu-restriction.yml`
-   
+
 We've already learned that deploying instances without memory and CPU restrictions isn't prudent. They may, in certain scenarious, consume all available resources, jeopardizing the stability of the entire cluster.
 
 Let's continue discussing restrictions on our workload in Kubernetes further, this time focusing on CPU and delving deeper into the broader concept of resource restriction.
@@ -132,7 +132,7 @@ We're applying the following constraints on our namespace (Quota) in the cpu-res
 ```
 spec:
   hard:
-    requests.cpu: "250m"  
+    requests.cpu: "250m"
     limits.cpu: "500m"
 ```
 And CPU restrictions in the deployment specification:
@@ -146,7 +146,7 @@ resources:
 We can see the CPU consumption of our Pod:
 ```
 kubectl top pod -n new
-NAME                              CPU(cores)   MEMORY(bytes)   
+NAME                              CPU(cores)   MEMORY(bytes)
 cpu-restriction-bf756bcc6-xk6cd   2m           0Mi
 ```
 Even though the existing Pod uses only 2 milliCores, the system reserved for it the whooping 50 milliCores:
@@ -193,8 +193,8 @@ Exactly the 6th pod won't be created because available cpu.requests (HARD limit 
 This occurs even though the real CPU Pod consumption is minimal (around 2 milliCores)
 ```
 kubectl  top pod -n new
-NAME                              CPU(cores)   MEMORY(bytes)           
-cpu-restriction-bf756bcc6-m2x9b   2m           0Mi             
+NAME                              CPU(cores)   MEMORY(bytes)
+cpu-restriction-bf756bcc6-m2x9b   2m           0Mi
 ```
 ```
 kubectl describe quota -n new
@@ -209,10 +209,10 @@ requests.cpu  250m  250    <=== no CPU for another reservation
 
 The other scenario is when deployed applications must compete for available CPU and memory resources in the cluster above specified CPU Request (in deployment spec).
 
-Now, you may want to change the peaceful 
-`['sh','-c','while true; do date & sleep 2; done']` 
-in cpu-restriction.yml 
- 
+Now, you may want to change the peaceful
+`['sh','-c','while true; do date & sleep 2; done']`
+in cpu-restriction.yml
+
 ```
       containers:
         - name: cpu
@@ -220,7 +220,7 @@ in cpu-restriction.yml
           command: ['sh','-c','while true; do date & sleep 2; done']
 ```
 <br/>
-..with one bash line that causes the whole thing more CPU-intensive:   
+..with one bash line that causes the whole thing more CPU-intensive:
 
 ```
 command: ['sh','-c','apt update && apt-get install bc -y && while true; do echo "scale=1000; a(1)*4" | bc -l & sleep 1; done']
@@ -230,7 +230,7 @@ command: ['sh','-c','apt update && apt-get install bc -y && while true; do echo 
 By the way, It is a simple way aimed to calculate the PI number with high accuracy using a basic calculator (bc).
 
 Restart the deployment with `kubectl apply -f cpu-restriction -n new` this time locally.
-Now, we are not constraint with quota in the namespace (we have enough CPU resources), but CPU contraints in our deployment spec:  
+Now, we are not constraint with quota in the namespace (we have enough CPU resources), but CPU contraints in our deployment spec:
 
 ```
 kubectl get pod $(kubectl get po -n new -o jsonpath='{.items[*].metadata.name}') -n new -o jsonpath='{.spec.containers[*].resources}'|jq
@@ -246,7 +246,7 @@ kubectl get pod $(kubectl get po -n new -o jsonpath='{.items[*].metadata.name}')
 ```
 kubectl  top pod -n new
 NAME                               CPU(cores)   MEMORY(bytes)
-cpu-restriction-5b6988d7dd-nl5h2   60m          87Mi    <=== CPU exceded cpu.requests but cannot exceed cpu.limits from deployment spec  
+cpu-restriction-5b6988d7dd-nl5h2   60m          87Mi    <=== CPU exceded cpu.requests but cannot exceed cpu.limits from deployment spec
 ```
 The exercise also depends on the performance of our processors. Your CPU unit is likely much more agile than mine, so the results may differ. You can experiment with the 'Limits' and 'Requests' in the specification, as well as the 'scale' variable in the container command. Increasing the 'scale' will stress the CPU unit more.
 
@@ -255,7 +255,7 @@ To sum it up, we arrive at the following conclusions:
 - 'Requests' are considered vital information in the deployment/pod specification, indicating how many resources should be reserved. They are SOFT values, meaning they can be exceeded if some application is more demanding in terms of CPU/memory, and there are free available resources in a namespace.
 - 'Limits' are impassable, final, HARD limits. The application will not be able to exceed these values; it will be throttled."
 
-<br/> 
+<br/>
 
 You might want to kick out all resources by: `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/cpu-restriction.yml` or simply: `kubectl delete --all -n new` but let's dive into the particularies of `Quality of Service - QoS` within our deployed pods, tightly linked with mentioned CPU and memory restrictions.
 
@@ -306,14 +306,14 @@ When you `kubectl get pod -n new -o yaml | grep qosClass`, it shows `qosClass: B
 
 <br/><br/>
 
-**`init-containers-usage` - a helm package that illustrates the concept of init-containers in Kubernetes cluster** 
+**`init-containers-usage` - a helm package that illustrates the concept of init-containers in Kubernetes cluster**
 
 ![obraz](https://github.com/maccu71/projects/assets/51779238/d982af6a-e8ef-4a85-b30a-4619db6070a1)
 
 To install this deployment with its service you need to:
 - have working Kubernetes cluster eg. Minikube and Helm package installed
 - `helm install my-release https://raw.githubusercontent.com/maccu71/projects/master/init-containers-usage-1.0.0.tgz`
-- you'll see the picture from NASA server on your browser:   `localhost:$(kubectl get service my-release -o jsonpath='{.spec.ports[*].nodePort}'|jq)`  
+- you'll see the picture from NASA server on your browser:   `localhost:$(kubectl get service my-release -o jsonpath='{.spec.ports[*].nodePort}'|jq)`
 OR if you use Minikube just: `minikube service my-release`
 
 Init containers in Kuberneteso are lightweight, transient containers that run and complete before the main application containers start. They are designed to perform initialization tasks, setup, or any necessary preparations before the main application containers in a pod begin running.
@@ -330,7 +330,7 @@ spec:
     - name: init-2
       [...]
 
-  containers: 
+  containers:
     - name: web
       image: nginx:latest
 ```
@@ -347,7 +347,7 @@ Key points about init containers:
 
 This version clarifies the potential use of a ConfigMap with a Bash script for more complex scenarios while emphasizing the primary purpose of the example, which is to showcase the behavior of sequential init containers
 
-<br/><br/> 
+<br/><br/>
 
 **6) `cleaner.yml` - kubernetes manifest intended to clean unnecessary resources from kubernetes cluster (use with caution)**
 
@@ -369,9 +369,9 @@ To delete leftovers (RBAC rules) you can proceed with a command:
 `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/cleaner.yml`
 
 
-<br/><br/> 
+<br/><br/>
 
-**7) `sonda-readiness-tcp.yml` - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers.** 
+**7) `sonda-readiness-tcp.yml` - A Kubernetes manifest showcasing the capabilities of a readinessProbe, a powerful feature ensuring the operational readiness of containers.**
 
 In this case, the readinessProbe is utilized to validate the availability of my local NFS service before bringing to life the container
 
@@ -421,7 +421,7 @@ pod/sonda-tcp-7bfcd95db-hv87v   1/1     Running   0          9m35s
 Kick it out by issuing:
 `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/sonda-readiness-tcp.yml`
 
-<br/><br/> 
+<br/><br/>
 
 **`rollout-daemonset.yml` - Rolling updates in DaemonSets component in Kubernetes**
 
@@ -555,12 +555,12 @@ When the DaemonSet definition changes (e.g., container image, port), Kubernetes 
 If we change 'updateStrategy' to 'OnDelete' we are forced to manual deletion and recreation of Pods after applying changes. The update is not automatically applied to existing Pod instances)
 
 What is the difference between them or Manual or Automatic Update? OnDelete requires user intervention to delete and recreate Pods for updates. RollingUpdate handles this automatically = just change manifest + apply it.
-OnDelete can be used for more controlled Pod lifecycle management but increases user management and responsibility = change manifest + apply it + delete pod. 
+OnDelete can be used for more controlled Pod lifecycle management but increases user management and responsibility = change manifest + apply it + delete pod.
 
 Final words:
-RollingUpdate offers a simpler and more automatic update method. But the choice of strategy depends on specific app. requirements, update policies, and the level of control you want to maintain over the Pod update process in your Kubernetes cluster. 
+RollingUpdate offers a simpler and more automatic update method. But the choice of strategy depends on specific app. requirements, update policies, and the level of control you want to maintain over the Pod update process in your Kubernetes cluster.
 
-We can wind up all by issuing: `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/rollout-daemonset.yml` 
+We can wind up all by issuing: `kubectl delete -f https://raw.githubusercontent.com/maccu71/projects/master/rollout-daemonset.yml`
 
 Now, a bit about rolling update in StatefulSets, it will be fun!
 
@@ -635,14 +635,14 @@ These strategies can be combined with `minReadySeconds`, which ensures that afte
 
 StatefulSets update strategies, including `rolling updates` and `partitioned updates`, offer flexibility and control over the update process, making them ideal for managing stateful applications in Kubernetes.
 
-<br/><br/> 
+<br/><br/>
 **allowing and bloking access via network policies in Kubernetes**
 
 `Ingress policy`:
 ```
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
-metadata: 
+metadata:
   name: restrict
   namespace: default
 spec:
@@ -650,7 +650,7 @@ spec:
     matchLabels:
       ver: three
   ingress:
-  - from: 
+  - from:
     - podSelector:
         matchLabels:
           ver: two
@@ -681,7 +681,7 @@ spec:
   - Egress
 ```
 ```
-$ kubectl describe networkpolicy egress-1 
+$ kubectl describe networkpolicy egress-1
 Name:         egress-1
 Namespace:    default
 Created on:   2024-06-24 20:47:03 +0200 CEST
@@ -719,7 +719,7 @@ Spec:
 ```
 ```
   ingress:
-  - from: 
+  - from:
     - podSelector:
         matchLabels:
           ver: two
@@ -731,9 +731,9 @@ Spec:
 
 **`stacje.py` - an application written in Python 3 that searches for available radio stations, allows you to select one from the list, starts it, and shows the name of the artist and song.**
 
- This is a really nice app that you can launch directly from your Linux console. Start the program in your linux console by issuing: 
-`python3 stacje.py` 
-or just 
+ This is a really nice app that you can launch directly from your Linux console. Start the program in your linux console by issuing:
+`python3 stacje.py`
+or just
 `./stacje.py````
 
 <br/><br/>
@@ -741,7 +741,7 @@ or just
 **`cwicz.py` - a Python program created to track and backup my running results and display them on a nice graph, this application utilizes various Python modules.**
 ![obraz](https://github.com/maccu71/projects/assets/51779238/887d3e3c-b59d-4a1c-bac3-c4e738d7160f)
 
-<br/><br/> 
+<br/><br/>
 
 **Ansible playbook intended to automate installation of a Kubernetes cluster on a Ubuntu24 KVM VMs**
 
@@ -752,7 +752,7 @@ Prerequisites: (all of this you can automate as well)
   You may get it from: https://ubuntu.com/download/server
 - ssh keys already uploaded eg. `ssh-keygen -t ed25519 -f ~/.ssh/ansible_ed25519` with `ssh-copy-id ansible_user@your_vm` on all
 - installed chrony time service - needed for smoothly API. apt-cache, etc. eg. `sudo apt install chrony -y && systemctl enable chrony --now`
-- set Ansible inventory eg. 
+- set Ansible inventory eg.
 
 ```
 ansible-inventory --graph
@@ -783,7 +783,7 @@ ansible_python_interpreter=/usr/bin/python3
 ansible_python_interpreter=/usr/bin/python3
 ```
 
-hint: it is good to make snapshots of your machines on KVM so you can revert to them in case of failure, 
+hint: it is good to make snapshots of your machines on KVM so you can revert to them in case of failure,
 eg. `for i in $(echo kworker1 kworker2 kmaster); do virsh snapshot-revert $i name_of_snapshot; done`
 
 Then:
@@ -791,7 +791,7 @@ Then:
 ansible -i hosts install-kubernetes-cluster.yml
 ```
 I'd like to add that I saw and got a bash procedure from https://medium.com/@subhampradhan966/kubeadm-setup-for-ubuntu-24-04-lts-f6a5fc67f0df and only 'translated' it from bash to Ansible or 'automated' it.
-It was refreshing to review Ansible modules along the way. 
+It was refreshing to review Ansible modules along the way.
 
 <br/><br/>
 
@@ -942,10 +942,10 @@ TASK [second task] *************************************************************
 changed: [192.168.122.202]
 ```
 
-As you have seen - all tasks were performed on one host (or on group of hosts if we didn't specify 'fork' directive or give -f more than one) and to the other, and so on.  
+As you have seen - all tasks were performed on one host (or on group of hosts if we didn't specify 'fork' directive or give -f more than one) and to the other, and so on.
 
 And lastly - executing tasks with the 'Free' strategy:
-We need to uncmment the line: 
+We need to uncmment the line:
 `# strategy: free`
 
 ```
@@ -1016,7 +1016,7 @@ The playbook behaves as expected—the first task, thanks to the run_once direct
 Keep in mind that we have only two hosts in our inventory. Let's check it out:
 
 ```
-$ ansible-inventory --graph 
+$ ansible-inventory --graph
 @all:
   |--@ungrouped:
   |  |--192.168.122.203
@@ -1027,7 +1027,7 @@ Let's spice things up a bit by uncommenting the 'serial: 1' option. This enforce
 We use the serial option when we don't want Ansible tasks to be executed at the same time or when we want to narrow down the number of hosts (e.g., to maintain the application’s functionality in a load-balancing scheme).
 
 ```
-$ ansible-playbook run_once.yml 
+$ ansible-playbook run_once.yml
 
 PLAY [directive run_once in action] ********************************************
 
@@ -1061,8 +1061,10 @@ We also noticed that the 'run_once' directive behaves similarly to the 'strategy
 2) `strategy: host_pinned` - performes sequential tasks on a batch of 5 hosts by default or the number specified in `fork` directive. Thus: `strategy: host_pinned` and `-f 1` during playbook execution effectively equals: `serial 1`
 
 **Simple monitoring**
-`simple_Tkinter_monitoring.py`  
+`simple_Tkinter_monitoring.py`
 ![wideo](https://github.com/user-attachments/assets/d6ee627b-f225-4d41-8fc8-620ec51dd7e5)
 
 
+**micro-weather-station.py**
 
+This small GUI written in Python uses Tkinter as well as requests module to get the simple weather condition based on the location you provide with.
