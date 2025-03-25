@@ -1060,11 +1060,16 @@ We also noticed that the 'run_once' directive behaves similarly to the 'strategy
 1) `serial: 1` performes all tasks on exactly one host after antother from the inventory
 2) `strategy: host_pinned` - performes sequential tasks on a batch of 5 hosts by default or the number specified in `fork` directive. Thus: `strategy: host_pinned` and `-f 1` during playbook execution effectively equals: `serial 1`
 
+
+**Tkinter framework**
+<br/><br/>
 **Simple monitoring**
 `simple_Tkinter_monitoring.py`
-![wideo](https://github.com/user-attachments/assets/d6ee627b-f225-4d41-8fc8-620ec51dd7e5)
-
-
+<br/><br/>
+![Zrzut ekranu z 2025-03-25 14-58-30](https://github.com/user-attachments/assets/ad6550ba-575d-4eaa-bbee-a1d28d60dd01)
+<br/><br/>
 **micro-weather-station.py**
+
+![micro](https://github.com/user-attachments/assets/fc7d51c3-a272-49c5-a93f-969aec6ec34c)
 
 This small GUI written in Python uses Tkinter as well as requests module to get the simple weather condition based on the location you provide with.
