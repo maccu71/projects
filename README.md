@@ -278,6 +278,9 @@ resources:
 ```
 When you run `kubectl describe pod -n new | grep QoS`, you'll see it proudly having the title `QoS Class: Guaranteed`. The best service guaranteed; Kubernetes treats these pods with the utmost respect, messing with them only if absolutely necessary. These pods have a fixed amount of resources allocated to them. They won't get more, and they won't get less, ensuring a stable environment.
 
+![guarantee](https://github.com/user-attachments/assets/91238199-b2f1-405d-8273-cc3cb9fd2d63)
+
+
 `Burstable`
 
 This is the flexible friend in the group. The CPU and/or memory limits and requests are different:
@@ -291,6 +294,9 @@ resources:
     memory: 100Mi
 ```
 Peek at `kubectl describe pod -n new | grep QoS`, and you'll find it having the `QoS Class: Burstable` label. Pods in this category get a minimum amount of resources but can use more if available (until limits - if specified).
+
+![burstable](https://github.com/user-attachments/assets/08535f72-8035-4d8d-9409-ffedb70e6f5f)
+
 
 `- BestEffort`
 
